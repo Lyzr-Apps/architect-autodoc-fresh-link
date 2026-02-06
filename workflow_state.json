@@ -1,0 +1,60 @@
+{
+  "workflow_name": "System Design Documentation Agent",
+  "created_at": "2026-02-06T00:00:00.000Z",
+  "agents": {
+    "design_orchestrator": {
+      "agent_id": "69858585b90162af337b1e37",
+      "name": "Design Orchestrator",
+      "type": "manager",
+      "status": "active"
+    },
+    "requirements_analyzer": {
+      "agent_id": "698584b62237a2c55706afdc",
+      "name": "Requirements Analyzer Agent",
+      "type": "sub_agent",
+      "status": "active"
+    },
+    "architecture_research": {
+      "agent_id": "698584d107ec48e3dc90a152",
+      "name": "Architecture Research Agent",
+      "type": "sub_agent",
+      "status": "active"
+    },
+    "architecture_designer": {
+      "agent_id": "698584ebc613a65b3c4193c7",
+      "name": "Architecture Designer Agent",
+      "type": "sub_agent",
+      "status": "active"
+    },
+    "technical_validator": {
+      "agent_id": "69858519382ef8715224cf17",
+      "name": "Technical Validator Agent",
+      "type": "sub_agent",
+      "status": "active"
+    },
+    "documentation_generator": {
+      "agent_id": "6985854d1caa4e686dd66d90",
+      "name": "Documentation Generator Agent",
+      "type": "sub_agent",
+      "status": "active"
+    }
+  },
+  "workflow_structure": {
+    "manager": "69858585b90162af337b1e37",
+    "sub_agents": [
+      "698584b62237a2c55706afdc",
+      "698584d107ec48e3dc90a152",
+      "698584ebc613a65b3c4193c7",
+      "69858519382ef8715224cf17",
+      "6985854d1caa4e686dd66d90"
+    ]
+  },
+  "response_schemas": [
+    "design_orchestrator_response.json",
+    "requirements_analyzer_agent_response.json",
+    "architecture_research_agent_response.json",
+    "architecture_designer_agent_response.json",
+    "technical_validator_agent_response.json",
+    "documentation_generator_agent_response.json"
+  ]
+}

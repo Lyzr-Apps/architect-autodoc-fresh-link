@@ -1,0 +1,543 @@
+{
+  "status": "success",
+  "result": {
+    "document": {
+      "version": "1.0",
+      "timestamp": "2026-02-06T10:30:00Z",
+      "executive_summary": {
+        "overview": "Enterprise-grade e-commerce platform designed for high availability, scalability, and compliance. The architecture leverages proven patterns from industry leaders (Amazon, Netflix, Shopify) to support 100K+ concurrent users with 99.99% uptime.",
+        "key_features": [
+          "Microservices architecture with event-driven processing",
+          "Multi-region active-active deployment for global reach",
+          "PCI-DSS Level 1 compliant payment processing",
+          "Real-time inventory management with eventual consistency",
+          "Comprehensive fault tolerance with circuit breakers and saga patterns"
+        ],
+        "business_value": "Platform capable of handling peak loads 10x normal traffic, ensuring revenue continuity during flash sales and seasonal spikes while maintaining regulatory compliance and customer trust.",
+        "timeline": "16-20 weeks for MVP, 24-28 weeks for full production deployment",
+        "investment": "$15,000-$25,000 monthly operational cost, $500K-$800K initial development cost"
+      },
+      "architecture_overview": {
+        "architectural_style": "Cloud-native microservices with event-driven architecture",
+        "core_principles": [
+          "Design for failure (Netflix-inspired resilience)",
+          "Horizontal scalability at every layer",
+          "Security and compliance by design",
+          "Observability-first approach",
+          "Loose coupling through event-driven communication"
+        ],
+        "system_diagram_description": "Three-tier architecture: Edge Layer (CDN + API Gateway) → Service Layer (6 microservices with service mesh) → Data Layer (sharded databases + distributed cache + event store). All layers deployed across 3 AWS regions (US-East, EU-West, AP-Southeast) with active-active configuration.",
+        "key_components": [
+          {
+            "name": "Edge Layer",
+            "components": ["CloudFront CDN", "Kong API Gateway", "AWS WAF"],
+            "purpose": "Traffic distribution, DDoS protection, authentication"
+          },
+          {
+            "name": "Service Layer",
+            "components": ["User Service", "Payment Service", "Order Service", "Inventory Service", "Notification Service", "Catalog Service"],
+            "purpose": "Business logic execution with independent scaling"
+          },
+          {
+            "name": "Data Layer",
+            "components": ["PostgreSQL (sharded)", "MongoDB (sharded)", "Redis Cluster", "Elasticsearch", "Kafka"],
+            "purpose": "Polyglot persistence optimized for each use case"
+          },
+          {
+            "name": "Infrastructure Layer",
+            "components": ["Kubernetes (EKS)", "Istio Service Mesh", "Terraform IaC", "HashiCorp Vault"],
+            "purpose": "Orchestration, secrets management, infrastructure automation"
+          }
+        ],
+        "real_world_patterns_applied": [
+          {
+            "pattern": "Amazon Cell-Based Architecture",
+            "application": "Service isolation to limit blast radius of failures",
+            "benefit": "Regional outage affects only that region's cell, not entire platform"
+          },
+          {
+            "pattern": "Netflix Circuit Breaker (Hystrix)",
+            "application": "All inter-service and external API calls",
+            "benefit": "Prevents cascading failures, graceful degradation"
+          },
+          {
+            "pattern": "Shopify Event-Driven Order Processing",
+            "application": "Order workflow and inventory management",
+            "benefit": "Handles 10x traffic spikes through async buffering"
+          },
+          {
+            "pattern": "Uber Database Sharding (Schemaless)",
+            "application": "User and order data partitioning",
+            "benefit": "Linear scalability for data growth"
+          }
+        ]
+      },
+      "component_specifications": {
+        "services": [
+          {
+            "name": "API Gateway",
+            "technology": "Kong Gateway 3.0+",
+            "responsibilities": ["Request routing", "Authentication/Authorization", "Rate limiting", "Request/Response transformation"],
+            "scaling": {
+              "min_instances": 3,
+              "max_instances": 50,
+              "trigger": "Request rate > 10K/min per instance"
+            },
+            "sla": {
+              "availability": "99.99%",
+              "latency_p95": "50ms"
+            }
+          },
+          {
+            "name": "User Service",
+            "technology": "Node.js 20 + Express + PostgreSQL",
+            "responsibilities": ["User registration", "Authentication", "Profile management", "Session handling"],
+            "api_endpoints": [
+              "POST /api/users/register - Create new user",
+              "POST /api/users/login - Authenticate user",
+              "GET /api/users/profile - Get user profile",
+              "PUT /api/users/profile - Update user profile"
+            ],
+            "database": {
+              "type": "PostgreSQL 14+",
+              "replication": "1 primary + 3 read replicas",
+              "backup": "Continuous archiving with PITR"
+            },
+            "scaling": {
+              "min_instances": 5,
+              "max_instances": 100,
+              "trigger": "CPU > 70% OR Request rate > 5K/min"
+            },
+            "sla": {
+              "availability": "99.95%",
+              "latency_p95": "150ms"
+            }
+          },
+          {
+            "name": "Payment Service",
+            "technology": "Java 17 + Spring Boot + Stripe SDK + Vault",
+            "responsibilities": ["Payment authorization", "Payment capture", "Refund processing", "PCI-DSS compliance"],
+            "security": {
+              "isolation": "Separate VPC with strict network ACLs",
+              "secrets": "HashiCorp Vault with auto-rotation",
+              "compliance": "PCI-DSS Level 1",
+              "tokenization": "Stripe tokenization (no card data stored)"
+            },
+            "api_endpoints": [
+              "POST /api/payments/authorize - Authorize payment",
+              "POST /api/payments/capture - Capture authorized payment",
+              "POST /api/payments/refund - Process refund"
+            ],
+            "fault_tolerance": {
+              "idempotency": "Idempotency keys on all requests",
+              "retry": "Exponential backoff (3 attempts max)",
+              "circuit_breaker": "Open after 50% failure rate",
+              "fallback": "Queue for offline processing"
+            },
+            "sla": {
+              "availability": "99.99%",
+              "latency_p95": "2000ms (including Stripe API)"
+            }
+          },
+          {
+            "name": "Order Service",
+            "technology": "Go 1.21 + Kafka + MongoDB",
+            "responsibilities": ["Order creation", "Order state management", "Saga orchestration", "Order history"],
+            "event_driven": {
+              "consumes": ["payment.authorized", "inventory.reserved", "shipping.confirmed"],
+              "publishes": ["order.created", "order.confirmed", "order.shipped", "order.cancelled"]
+            },
+            "database": {
+              "type": "MongoDB 6.0+",
+              "sharding": "Sharded by customer_id",
+              "shards": "4 shards initially, auto-balancing enabled"
+            },
+            "saga_pattern": {
+              "type": "Orchestration-based",
+              "compensations": ["CancelPayment", "ReleaseInventory", "CancelShipping"],
+              "timeout": "10 minutes per saga step"
+            },
+            "sla": {
+              "availability": "99.95%",
+              "latency_p95": "300ms (sync), 5s (async processing)"
+            }
+          },
+          {
+            "name": "Inventory Service",
+            "technology": "Python 3.11 + FastAPI + Redis + PostgreSQL",
+            "responsibilities": ["Inventory tracking", "Reservation management", "Stock level updates", "Low stock alerts"],
+            "consistency_model": "Eventual consistency with two-phase reservation",
+            "caching": {
+              "strategy": "Write-through cache",
+              "ttl": "60 seconds for stock levels",
+              "invalidation": "Event-driven on stock updates"
+            },
+            "api_endpoints": [
+              "GET /api/inventory/:product_id - Get stock level",
+              "POST /api/inventory/reserve - Reserve inventory",
+              "POST /api/inventory/release - Release reservation"
+            ],
+            "sla": {
+              "availability": "99.9%",
+              "latency_p95": "100ms (cached), 300ms (uncached)"
+            }
+          },
+          {
+            "name": "Notification Service",
+            "technology": "Node.js 20 + SendGrid + Twilio + FCM",
+            "responsibilities": ["Email notifications", "SMS notifications", "Push notifications", "Delivery tracking"],
+            "channels": [
+              {"type": "Email", "provider": "SendGrid", "use_case": "Order confirmations, receipts"},
+              {"type": "SMS", "provider": "Twilio", "use_case": "Order shipped, delivery alerts"},
+              {"type": "Push", "provider": "Firebase Cloud Messaging", "use_case": "Real-time order updates"}
+            ],
+            "fault_tolerance": {
+              "retry": "Exponential backoff (5 attempts)",
+              "dlq": "Dead letter queue for failed notifications",
+              "fallback": "Alternate channel if primary fails"
+            },
+            "sla": {
+              "availability": "99.5%",
+              "delivery_time": "< 1 minute for high-priority notifications"
+            }
+          }
+        ]
+      },
+      "security_architecture": {
+        "authentication": {
+          "mechanism": "OAuth2 + JWT",
+          "token_lifetime": {
+            "access_token": "15 minutes",
+            "refresh_token": "7 days"
+          },
+          "mfa": "Optional for users, required for admin access",
+          "password_policy": "Min 12 chars, complexity requirements, bcrypt hashing"
+        },
+        "authorization": {
+          "model": "Role-Based Access Control (RBAC)",
+          "roles": ["Customer", "Admin", "Support", "Developer"],
+          "enforcement": "JWT claims + API Gateway policy"
+        },
+        "data_protection": {
+          "in_transit": "TLS 1.3 for all communications",
+          "at_rest": "AES-256 encryption for all databases",
+          "pii_handling": "Tokenization + field-level encryption",
+          "key_management": "HashiCorp Vault with auto-rotation"
+        },
+        "network_security": {
+          "segmentation": "VPC with private/public subnets, payment service in isolated VPC",
+          "firewall": "Security groups + NACLs, AWS WAF on API Gateway",
+          "ddos_protection": "AWS Shield Standard + rate limiting",
+          "ingress": "Only via API Gateway, no direct service access"
+        },
+        "compliance": {
+          "pci_dss": {
+            "level": "Level 1",
+            "scope": "Payment service only",
+            "controls": ["Network segmentation", "Tokenization", "Audit logging", "Quarterly scans"]
+          },
+          "gdpr": {
+            "controls": ["Data subject rights", "Consent management", "Data retention policies", "Breach notification"],
+            "data_residency": "EU customer data stored in EU-West region"
+          },
+          "soc2": {
+            "status": "In progress",
+            "expected_completion": "Q3 2026"
+          }
+        }
+      },
+      "scalability_patterns": {
+        "horizontal_scaling": {
+          "strategy": "Auto-scaling based on metrics",
+          "metrics": ["CPU utilization > 70%", "Memory > 80%", "Request rate (custom)", "Queue depth"],
+          "scale_out_cooldown": "3 minutes",
+          "scale_in_cooldown": "10 minutes"
+        },
+        "database_scaling": {
+          "reads": "Read replicas (1 primary + 3 replicas per service)",
+          "writes": "Sharding by customer_id for user/order data",
+          "connections": "PgBouncer connection pooling (max 100 per instance)",
+          "caching": "Redis cluster for frequently accessed data"
+        },
+        "caching_strategy": {
+          "layers": [
+            {"layer": "CDN", "content": "Static assets, API responses", "ttl": "24 hours"},
+            {"layer": "Redis", "content": "Session data, product catalog", "ttl": "60 seconds - 1 hour"},
+            {"layer": "Application", "content": "Configuration, feature flags", "ttl": "5 minutes"}
+          ],
+          "invalidation": "Event-driven cache invalidation on data updates"
+        },
+        "async_processing": {
+          "pattern": "Event-driven with Kafka",
+          "use_cases": ["Order processing", "Inventory updates", "Notifications", "Analytics"],
+          "benefit": "Decouples services, buffers traffic spikes, enables retry"
+        },
+        "capacity_planning": {
+          "current": "100K concurrent users, 50K requests/sec",
+          "growth": "2x annually",
+          "headroom": "50% over-provisioning for peak events"
+        }
+      },
+      "fault_tolerance": {
+        "availability_architecture": {
+          "deployment": "Multi-region active-active",
+          "regions": ["US-East-1 (primary)", "EU-West-1", "AP-Southeast-1"],
+          "zones_per_region": "3 availability zones minimum",
+          "failover": "Automatic DNS failover with Route53 health checks"
+        },
+        "resilience_patterns": {
+          "circuit_breaker": {
+            "library": "Resilience4j",
+            "configuration": {
+              "failure_threshold": "50%",
+              "timeout": "5 seconds",
+              "half_open_after": "30 seconds",
+              "minimum_calls": "10"
+            },
+            "applied_to": "All inter-service calls, external APIs, database queries"
+          },
+          "retry_policy": {
+            "strategy": "Exponential backoff with jitter",
+            "max_attempts": 3,
+            "initial_delay": "100ms",
+            "max_delay": "5 seconds",
+            "applied_to": "Transient failures (timeouts, 5xx errors)"
+          },
+          "bulkhead": {
+            "strategy": "Separate thread pools per dependency",
+            "pool_sizes": {
+              "database": "50 threads",
+              "external_apis": "20 threads",
+              "internal_services": "30 threads"
+            }
+          },
+          "timeout": {
+            "api_gateway": "30 seconds",
+            "service_to_service": "5 seconds",
+            "database_queries": "3 seconds"
+          }
+        },
+        "data_resilience": {
+          "database_ha": {
+            "mechanism": "Patroni for PostgreSQL automatic failover",
+            "replication": "Synchronous for payment/order data, asynchronous for others",
+            "backup": "Continuous archiving + daily snapshots, 30-day retention",
+            "recovery": "Point-in-time recovery (PITR) with 5-minute granularity"
+          },
+          "cross_region_replication": {
+            "databases": "Asynchronous replication to all regions",
+            "object_storage": "S3 cross-region replication for assets",
+            "consistency": "Eventual consistency with CRDTs for conflict resolution"
+          }
+        },
+        "disaster_recovery": {
+          "rpo": "< 1 hour (Recovery Point Objective)",
+          "rto": "< 4 hours (Recovery Time Objective)",
+          "strategy": "Automated failover to healthy region",
+          "testing": "Quarterly DR drills with runbooks"
+        },
+        "chaos_engineering": {
+          "tools": "Netflix Chaos Monkey adapted for Kubernetes",
+          "experiments": ["Random pod termination", "Network latency injection", "Resource exhaustion", "Region failure simulation"],
+          "frequency": "Weekly in staging, monthly in production (off-peak)"
+        }
+      },
+      "cost_estimation": {
+        "monthly_operational_cost": {
+          "total": "$15,000 - $25,000",
+          "breakdown": {
+            "compute": {
+              "amount": "$8,000",
+              "details": "EKS cluster (3 regions × 20 nodes × $0.05/hr)"
+            },
+            "database": {
+              "amount": "$5,000",
+              "details": "RDS PostgreSQL (3 regions, primary + 3 replicas each), MongoDB Atlas"
+            },
+            "cache": {
+              "amount": "$1,500",
+              "details": "ElastiCache Redis cluster (3 regions)"
+            },
+            "message_queue": {
+              "amount": "$1,200",
+              "details": "Amazon MSK (Managed Kafka) 3 regions"
+            },
+            "networking": {
+              "amount": "$2,000",
+              "details": "Data transfer, load balancers, NAT gateways"
+            },
+            "monitoring": {
+              "amount": "$1,000",
+              "details": "Datadog APM, Prometheus/Grafana, log storage"
+            },
+            "security": {
+              "amount": "$800",
+              "details": "WAF, Vault, certificate management"
+            },
+            "storage": {
+              "amount": "$500",
+              "details": "S3, EBS volumes, backups"
+            },
+            "third_party": {
+              "amount": "$2,000",
+              "details": "SendGrid, Twilio, payment gateway fees (variable)"
+            }
+          },
+          "scaling_factors": "Costs increase linearly with traffic up to current capacity, then step function at 2x traffic"
+        },
+        "initial_development_cost": {
+          "total": "$500,000 - $800,000",
+          "breakdown": {
+            "backend_development": "$250,000 (6 engineers × 4 months)",
+            "frontend_development": "$120,000 (3 engineers × 4 months)",
+            "infrastructure": "$80,000 (2 DevOps × 4 months)",
+            "qa_testing": "$60,000 (2 QA engineers × 3 months)",
+            "security_audit": "$40,000 (PCI-DSS compliance audit)",
+            "project_management": "$50,000 (1 PM × 5 months)"
+          },
+          "timeline": "16-20 weeks for MVP, 24-28 weeks full deployment"
+        },
+        "cost_optimization_opportunities": [
+          "Reserved instances for baseline compute (30% savings)",
+          "S3 Glacier for old order data (40% storage savings)",
+          "Spot instances for non-critical workloads (60% savings)",
+          "Cache optimization to reduce database queries (20% database cost savings)"
+        ]
+      },
+      "integration_apis": {
+        "rest_api": {
+          "base_url": "https://api.ecommerce.example.com/v1",
+          "authentication": "OAuth2 Bearer token",
+          "rate_limiting": "1000 requests/minute per user, 10000/minute per API key",
+          "endpoints": [
+            {
+              "path": "POST /api/users/register",
+              "description": "Register new user",
+              "request": {"email": "string", "password": "string", "name": "string"},
+              "response": {"user_id": "string", "access_token": "string"}
+            },
+            {
+              "path": "POST /api/orders",
+              "description": "Create new order",
+              "request": {"items": "array", "shipping_address": "object", "payment_method": "string"},
+              "response": {"order_id": "string", "status": "string", "total": "number"}
+            },
+            {
+              "path": "GET /api/orders/:id",
+              "description": "Get order details",
+              "response": {"order_id": "string", "status": "string", "items": "array", "tracking": "object"}
+            },
+            {
+              "path": "GET /api/inventory/:product_id",
+              "description": "Check product availability",
+              "response": {"product_id": "string", "available": "boolean", "quantity": "number"}
+            }
+          ]
+        },
+        "graphql_api": {
+          "endpoint": "https://api.ecommerce.example.com/graphql",
+          "authentication": "OAuth2 Bearer token",
+          "use_case": "Flexible queries for mobile/web clients to reduce over-fetching",
+          "example_query": "query { user(id: \"123\") { name orders { id status items { name price } } } }"
+        },
+        "webhooks": {
+          "events": [
+            {"event": "order.created", "payload": {"order_id": "string", "user_id": "string", "total": "number"}},
+            {"event": "payment.completed", "payload": {"payment_id": "string", "order_id": "string", "amount": "number"}},
+            {"event": "order.shipped", "payload": {"order_id": "string", "tracking_number": "string", "carrier": "string"}}
+          ],
+          "delivery": "Retry with exponential backoff (5 attempts), HMAC signature for verification"
+        },
+        "third_party_integrations": [
+          {
+            "provider": "Stripe",
+            "purpose": "Payment processing",
+            "api": "Stripe API v2023-10-16",
+            "authentication": "API Secret Key"
+          },
+          {
+            "provider": "SendGrid",
+            "purpose": "Email notifications",
+            "api": "SendGrid Web API v3",
+            "authentication": "API Key"
+          },
+          {
+            "provider": "Twilio",
+            "purpose": "SMS notifications",
+            "api": "Twilio REST API",
+            "authentication": "Account SID + Auth Token"
+          }
+        ]
+      },
+      "references": [
+        {
+          "title": "Amazon Builders' Library - Avoiding Fallback in Distributed Systems",
+          "url": "https://aws.amazon.com/builders-library/avoiding-fallback-in-distributed-systems",
+          "relevance": "Cell-based architecture and blast radius reduction"
+        },
+        {
+          "title": "Netflix Tech Blog - Fault Tolerance in a High Volume Distributed System",
+          "url": "https://netflixtechblog.com/fault-tolerance-in-a-high-volume-distributed-system-91ab4faae74a",
+          "relevance": "Circuit breaker implementation and chaos engineering"
+        },
+        {
+          "title": "Shopify Engineering - Surviving Black Friday",
+          "url": "https://shopify.engineering/surviving-flashes-of-high-write-traffic-using-scriptable-load-balancers",
+          "relevance": "Event-driven order processing and traffic spike handling"
+        },
+        {
+          "title": "Uber Engineering - Schemaless Database Architecture",
+          "url": "https://eng.uber.com/schemaless-part-one-mysql-datastore",
+          "relevance": "Database sharding and multi-region replication patterns"
+        },
+        {
+          "title": "Martin Fowler - Saga Pattern",
+          "url": "https://microservices.io/patterns/data/saga.html",
+          "relevance": "Distributed transaction management"
+        },
+        {
+          "title": "PCI Security Standards Council - PCI DSS v4.0",
+          "url": "https://www.pcisecuritystandards.org",
+          "relevance": "Payment security compliance requirements"
+        }
+      ],
+      "appendix": {
+        "glossary": [
+          {"term": "Circuit Breaker", "definition": "Design pattern that prevents cascading failures by stopping requests to a failing service"},
+          {"term": "Saga Pattern", "definition": "Distributed transaction pattern using compensating transactions"},
+          {"term": "Eventual Consistency", "definition": "Data consistency model where updates propagate asynchronously"},
+          {"term": "CQRS", "definition": "Command Query Responsibility Segregation - separate read/write models"},
+          {"term": "RTO", "definition": "Recovery Time Objective - maximum acceptable downtime"},
+          {"term": "RPO", "definition": "Recovery Point Objective - maximum acceptable data loss"}
+        ],
+        "deployment_phases": [
+          {
+            "phase": "Phase 1: MVP (Weeks 1-8)",
+            "deliverables": ["Core services (User, Product, Order)", "Basic payment integration", "Single region deployment"],
+            "milestone": "Support 10K concurrent users"
+          },
+          {
+            "phase": "Phase 2: Scaling (Weeks 9-16)",
+            "deliverables": ["Inventory service", "Notification service", "Caching layer", "Multi-AZ deployment"],
+            "milestone": "Support 50K concurrent users"
+          },
+          {
+            "phase": "Phase 3: Resilience (Weeks 17-24)",
+            "deliverables": ["Multi-region deployment", "Circuit breakers", "Saga pattern", "Chaos testing"],
+            "milestone": "99.99% uptime SLA"
+          },
+          {
+            "phase": "Phase 4: Optimization (Weeks 25-28)",
+            "deliverables": ["Performance tuning", "Cost optimization", "Security audit", "Compliance certification"],
+            "milestone": "PCI-DSS Level 1 certification"
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "agent_name": "Documentation Generator Agent",
+    "timestamp": "2026-02-06T10:30:00Z",
+    "document_template": "Enterprise System Design Template v2.1"
+  }
+}

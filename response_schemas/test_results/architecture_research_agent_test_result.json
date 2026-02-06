@@ -1,0 +1,15 @@
+{
+  "agent_name": "Architecture Research Agent",
+  "agent_id": "698584d107ec48e3dc90a152",
+  "test_message": "Research how Netflix and Amazon implement fault-tolerant architectures for high-traffic systems. Find real-world patterns for handling database failures and scaling strategies for e-commerce platforms.",
+  "expected_purpose": "assistant",
+  "timestamp": "2026-02-06T06:13:54.534652",
+  "is_valid_json": false,
+  "validation_errors": [
+    "Response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+  ],
+  "actual_response": {
+    "raw_text": "litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=sonar-pro\n Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers"
+  },
+  "raw_response": "litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=sonar-pro\n Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers"
+}

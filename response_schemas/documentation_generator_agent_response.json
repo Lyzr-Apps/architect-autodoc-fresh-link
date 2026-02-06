@@ -1,0 +1,639 @@
+{
+  "agent_name": "Documentation Generator Agent",
+  "agent_id": "6985854d1caa4e686dd66d90",
+  "agent_purpose": "documentation_generation",
+  "description": "Produces comprehensive system design documentation with executive summaries, specifications, cost estimations, and real-world references",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "document": {
+        "version": "string",
+        "created_date": "string",
+        "executive_summary": {
+          "overview": "string",
+          "business_value": "string",
+          "key_decisions": [
+            "string"
+          ],
+          "estimated_timeline": "string",
+          "estimated_cost": "string"
+        },
+        "architecture_overview": {
+          "description": "string",
+          "architecture_style": "string",
+          "key_components": [
+            "string"
+          ],
+          "data_flow_description": "string",
+          "diagram_description": "string"
+        },
+        "component_specs": [
+          {
+            "name": "string",
+            "purpose": "string",
+            "technology": "string",
+            "interfaces": [
+              "string"
+            ],
+            "scalability": "string",
+            "fault_tolerance": "string",
+            "dependencies": [
+              "string"
+            ]
+          }
+        ],
+        "technology_stack": {
+          "frontend": {
+            "technology": "string",
+            "justification": "string"
+          },
+          "backend": {
+            "technology": "string",
+            "justification": "string"
+          },
+          "database": {
+            "technology": "string",
+            "justification": "string"
+          },
+          "infrastructure": {
+            "technology": "string",
+            "justification": "string"
+          },
+          "monitoring": {
+            "technology": "string",
+            "justification": "string"
+          }
+        },
+        "security_architecture": {
+          "authentication": "string",
+          "authorization": "string",
+          "encryption": "string",
+          "compliance_measures": [
+            "string"
+          ],
+          "security_controls": [
+            "string"
+          ]
+        },
+        "scalability_patterns": {
+          "horizontal_scaling": "string",
+          "vertical_scaling": "string",
+          "database_scaling": "string",
+          "caching_strategy": "string",
+          "load_balancing": "string"
+        },
+        "fault_tolerance": {
+          "redundancy": "string",
+          "disaster_recovery": "string",
+          "backup_strategy": "string",
+          "rto_rpo": {
+            "RTO": "string",
+            "RPO": "string"
+          },
+          "failure_handling": [
+            "string"
+          ]
+        },
+        "cost_estimation": {
+          "infrastructure_costs": {
+            "compute": "string",
+            "storage": "string",
+            "networking": "string",
+            "total_monthly": "string"
+          },
+          "operational_costs": {
+            "monitoring": "string",
+            "support": "string",
+            "total_monthly": "string"
+          },
+          "total_cost_of_ownership": {
+            "year_1": "string",
+            "year_3": "string",
+            "assumptions": [
+              "string"
+            ]
+          }
+        },
+        "integration_apis": [
+          {
+            "name": "string",
+            "purpose": "string",
+            "protocol": "string",
+            "authentication": "string",
+            "endpoints": [
+              "string"
+            ]
+          }
+        ],
+        "implementation_roadmap": {
+          "phase_1": {
+            "duration": "string",
+            "deliverables": [
+              "string"
+            ]
+          },
+          "phase_2": {
+            "duration": "string",
+            "deliverables": [
+              "string"
+            ]
+          },
+          "phase_3": {
+            "duration": "string",
+            "deliverables": [
+              "string"
+            ]
+          }
+        },
+        "references": [
+          {
+            "type": "string",
+            "title": "string",
+            "company": "string",
+            "url": "string",
+            "relevance": "string"
+          }
+        ],
+        "trade_off_justifications": [
+          {
+            "decision": "string",
+            "alternatives": [
+              "string"
+            ],
+            "rationale": "string",
+            "real_world_example": "string"
+          }
+        ]
+      }
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "document": {
+        "version": "1.0.0",
+        "created_date": "2024-06-12T18:00:00Z",
+        "executive_summary": {
+          "overview": "This document details the system design for a cloud-native e-commerce platform supporting web and mobile channels, modular microservices, and elastic scalability. The architecture supports rapid feature release, high availability, and robust transaction processing.",
+          "business_value": "Enables new revenue streams, faster time-to-market, and cost efficiencies via cloud-native principles and API-first integration with partners.",
+          "key_decisions": [
+            "Adoption of microservices architecture for independent scaling and deployment.",
+            "Use of managed cloud services to optimize maintenance and operational overhead."
+          ],
+          "estimated_timeline": "6-9 months from project kickoff to production launch, with a phased rollout.",
+          "estimated_cost": "$400K - $600K initial implementation; annual OPEX of $100K\u2013$150K."
+        },
+        "architecture_overview": {
+          "description": "The system adopts a microservices architecture, decomposed into independent services such as Product Catalog, Order Processing, Payments, and User Management. These services communicate over RESTful APIs via an API Gateway. A managed cloud database is used for persistence. A CDN accelerates asset delivery.",
+          "architecture_style": "microservices",
+          "key_components": [
+            "API Gateway",
+            "Product Catalog Service",
+            "Order Service",
+            "User Service",
+            "Payment Service",
+            "Database Cluster",
+            "Cache",
+            "CDN"
+          ],
+          "data_flow_description": "User requests pass through the CDN and API Gateway, which routes them to the relevant microservice. Services interact with the shared database and cache as needed, and external integrations (e.g., payment gateways) are accessed from within specific services.",
+          "diagram_description": "The diagram depicts clients accessing the system via a CDN, with all API traffic routed through an API Gateway. The gateway routes to various microservices, each backed by a database and optional cache, and communicates with external partners."
+        },
+        "component_specs": [
+          {
+            "name": "API Gateway",
+            "purpose": "Central entrypoint for all client requests; routing, security, and rate limiting.",
+            "technology": "AWS API Gateway",
+            "interfaces": [
+              "/api/v1/*"
+            ],
+            "scalability": "Auto-scales with incoming traffic.",
+            "fault_tolerance": "Multi-AZ deployment, health checks.",
+            "dependencies": [
+              "Product Catalog",
+              "Order Service"
+            ]
+          },
+          {
+            "name": "Product Catalog Service",
+            "purpose": "Manages product listings and search functionality.",
+            "technology": "Node.js, Express",
+            "interfaces": [
+              "/products",
+              "/search"
+            ],
+            "scalability": "Kubernetes pods with HPA.",
+            "fault_tolerance": "Pod-level redundancy, rolling updates.",
+            "dependencies": [
+              "Database Cluster",
+              "Cache"
+            ]
+          }
+        ],
+        "technology_stack": {
+          "frontend": {
+            "technology": "React.js",
+            "justification": "Component-oriented, fast development, SEO support"
+          },
+          "backend": {
+            "technology": "Node.js with Express",
+            "justification": "High concurrency, robust ecosystem"
+          },
+          "database": {
+            "technology": "Amazon Aurora",
+            "justification": "High availability, managed scaling"
+          },
+          "infrastructure": {
+            "technology": "AWS EKS (Kubernetes)",
+            "justification": "Automated deployment, orchestration, scaling"
+          },
+          "monitoring": {
+            "technology": "Datadog",
+            "justification": "Unified metrics and alerting"
+          }
+        },
+        "security_architecture": {
+          "authentication": "OAuth 2.0 with JWT tokens",
+          "authorization": "Role-based access control enforced via middleware",
+          "encryption": "TLS 1.2+ in transit, AES-256 at rest",
+          "compliance_measures": [
+            "GDPR deletion workflows",
+            "PCI DSS for payments"
+          ],
+          "security_controls": [
+            "WAF",
+            "API rate limiting",
+            "IAM policy review"
+          ]
+        },
+        "scalability_patterns": {
+          "horizontal_scaling": "Auto-scaling for microservices based on CPU/memory load via Kubernetes HPA.",
+          "vertical_scaling": "Instance resizing for database nodes and caching layers.",
+          "database_scaling": "Read replica support and partitioned data where applicable.",
+          "caching_strategy": "Redis cache for hot data; CDN for static assets.",
+          "load_balancing": "Managed load balancer distributes incoming service requests."
+        },
+        "fault_tolerance": {
+          "redundancy": "Multi-AZ cloud deployment, multi-pod services.",
+          "disaster_recovery": "Daily snapshots; cross-region database replication.",
+          "backup_strategy": "Automated nightly backups of DB and persistent storage.",
+          "rto_rpo": {
+            "RTO": "2 hours",
+            "RPO": "15 minutes"
+          },
+          "failure_handling": [
+            "Circuit breakers",
+            "Automatic retries",
+            "Graceful degradation"
+          ]
+        },
+        "cost_estimation": {
+          "infrastructure_costs": {
+            "compute": "$4,000/month",
+            "storage": "$1,200/month",
+            "networking": "$800/month",
+            "total_monthly": "$6,000/month"
+          },
+          "operational_costs": {
+            "monitoring": "$500/month",
+            "support": "$2,000/month",
+            "total_monthly": "$2,500/month"
+          },
+          "total_cost_of_ownership": {
+            "year_1": "$100,000-$150,000",
+            "year_3": "$300,000-$400,000",
+            "assumptions": [
+              "Average 200K MAU",
+              "Standard support SLAs"
+            ]
+          }
+        },
+        "integration_apis": [
+          {
+            "name": "Payment Gateway API",
+            "purpose": "Processes online payments",
+            "protocol": "REST",
+            "authentication": "API Keys + TLS",
+            "endpoints": [
+              "/pay",
+              "/refund"
+            ]
+          },
+          {
+            "name": "Inventory Partner API",
+            "purpose": "Synchronizes product stock",
+            "protocol": "REST",
+            "authentication": "OAuth 2.0",
+            "endpoints": [
+              "/products/update"
+            ]
+          }
+        ],
+        "implementation_roadmap": {
+          "phase_1": {
+            "duration": "1-2 months",
+            "deliverables": [
+              "MVP architecture",
+              "Core microservices",
+              "Basic frontend"
+            ]
+          },
+          "phase_2": {
+            "duration": "3 months",
+            "deliverables": [
+              "Full service layer",
+              "Payment integration",
+              "Production infrastructure"
+            ]
+          },
+          "phase_3": {
+            "duration": "2-4 months",
+            "deliverables": [
+              "Mobile apps",
+              "Partner APIs",
+              "Automation and monitoring"
+            ]
+          }
+        },
+        "references": [
+          {
+            "type": "case_study",
+            "title": "Etsy's Evolution to Microservices",
+            "company": "Etsy",
+            "url": "https://www.infoq.com/articles/etsy-microservices-rewrite/",
+            "relevance": "Demonstrates migration to microservices for scalability and deployment agility."
+          },
+          {
+            "type": "pattern",
+            "title": "API Gateway Pattern",
+            "company": "",
+            "url": "https://martinfowler.com/articles/apigateway.html",
+            "relevance": "Reference for central routing in distributed systems."
+          }
+        ],
+        "trade_off_justifications": [
+          {
+            "decision": "Microservices vs. Monolith",
+            "alternatives": [
+              "Monolithic app",
+              "Microservices"
+            ],
+            "rationale": "Microservices allow for independent deployment and scaling, better fitting rapid feature iteration and high-load variability.",
+            "real_world_example": "Etsy, Amazon"
+          },
+          {
+            "decision": "Managed Cloud Database",
+            "alternatives": [
+              "Self-hosted DB",
+              "Cloud-managed DB"
+            ],
+            "rationale": "Cloud-managed offers automated updates, backup, and failover, reducing operational overhead.",
+            "real_world_example": "Airbnb"
+          }
+        ]
+      }
+    },
+    "metadata": {
+      "agent_name": "Documentation Generator Agent",
+      "timestamp": "2024-06-12T18:00:00Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-06T06:08:44.887243",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "document": {
+        "version": "1.0.0",
+        "created_date": "2024-06-12T18:00:00Z",
+        "executive_summary": {
+          "overview": "This document details the system design for a cloud-native e-commerce platform supporting web and mobile channels, modular microservices, and elastic scalability. The architecture supports rapid feature release, high availability, and robust transaction processing.",
+          "business_value": "Enables new revenue streams, faster time-to-market, and cost efficiencies via cloud-native principles and API-first integration with partners.",
+          "key_decisions": [
+            "Adoption of microservices architecture for independent scaling and deployment.",
+            "Use of managed cloud services to optimize maintenance and operational overhead."
+          ],
+          "estimated_timeline": "6-9 months from project kickoff to production launch, with a phased rollout.",
+          "estimated_cost": "$400K - $600K initial implementation; annual OPEX of $100K\u2013$150K."
+        },
+        "architecture_overview": {
+          "description": "The system adopts a microservices architecture, decomposed into independent services such as Product Catalog, Order Processing, Payments, and User Management. These services communicate over RESTful APIs via an API Gateway. A managed cloud database is used for persistence. A CDN accelerates asset delivery.",
+          "architecture_style": "microservices",
+          "key_components": [
+            "API Gateway",
+            "Product Catalog Service",
+            "Order Service",
+            "User Service",
+            "Payment Service",
+            "Database Cluster",
+            "Cache",
+            "CDN"
+          ],
+          "data_flow_description": "User requests pass through the CDN and API Gateway, which routes them to the relevant microservice. Services interact with the shared database and cache as needed, and external integrations (e.g., payment gateways) are accessed from within specific services.",
+          "diagram_description": "The diagram depicts clients accessing the system via a CDN, with all API traffic routed through an API Gateway. The gateway routes to various microservices, each backed by a database and optional cache, and communicates with external partners."
+        },
+        "component_specs": [
+          {
+            "name": "API Gateway",
+            "purpose": "Central entrypoint for all client requests; routing, security, and rate limiting.",
+            "technology": "AWS API Gateway",
+            "interfaces": [
+              "/api/v1/*"
+            ],
+            "scalability": "Auto-scales with incoming traffic.",
+            "fault_tolerance": "Multi-AZ deployment, health checks.",
+            "dependencies": [
+              "Product Catalog",
+              "Order Service"
+            ]
+          },
+          {
+            "name": "Product Catalog Service",
+            "purpose": "Manages product listings and search functionality.",
+            "technology": "Node.js, Express",
+            "interfaces": [
+              "/products",
+              "/search"
+            ],
+            "scalability": "Kubernetes pods with HPA.",
+            "fault_tolerance": "Pod-level redundancy, rolling updates.",
+            "dependencies": [
+              "Database Cluster",
+              "Cache"
+            ]
+          }
+        ],
+        "technology_stack": {
+          "frontend": {
+            "technology": "React.js",
+            "justification": "Component-oriented, fast development, SEO support"
+          },
+          "backend": {
+            "technology": "Node.js with Express",
+            "justification": "High concurrency, robust ecosystem"
+          },
+          "database": {
+            "technology": "Amazon Aurora",
+            "justification": "High availability, managed scaling"
+          },
+          "infrastructure": {
+            "technology": "AWS EKS (Kubernetes)",
+            "justification": "Automated deployment, orchestration, scaling"
+          },
+          "monitoring": {
+            "technology": "Datadog",
+            "justification": "Unified metrics and alerting"
+          }
+        },
+        "security_architecture": {
+          "authentication": "OAuth 2.0 with JWT tokens",
+          "authorization": "Role-based access control enforced via middleware",
+          "encryption": "TLS 1.2+ in transit, AES-256 at rest",
+          "compliance_measures": [
+            "GDPR deletion workflows",
+            "PCI DSS for payments"
+          ],
+          "security_controls": [
+            "WAF",
+            "API rate limiting",
+            "IAM policy review"
+          ]
+        },
+        "scalability_patterns": {
+          "horizontal_scaling": "Auto-scaling for microservices based on CPU/memory load via Kubernetes HPA.",
+          "vertical_scaling": "Instance resizing for database nodes and caching layers.",
+          "database_scaling": "Read replica support and partitioned data where applicable.",
+          "caching_strategy": "Redis cache for hot data; CDN for static assets.",
+          "load_balancing": "Managed load balancer distributes incoming service requests."
+        },
+        "fault_tolerance": {
+          "redundancy": "Multi-AZ cloud deployment, multi-pod services.",
+          "disaster_recovery": "Daily snapshots; cross-region database replication.",
+          "backup_strategy": "Automated nightly backups of DB and persistent storage.",
+          "rto_rpo": {
+            "RTO": "2 hours",
+            "RPO": "15 minutes"
+          },
+          "failure_handling": [
+            "Circuit breakers",
+            "Automatic retries",
+            "Graceful degradation"
+          ]
+        },
+        "cost_estimation": {
+          "infrastructure_costs": {
+            "compute": "$4,000/month",
+            "storage": "$1,200/month",
+            "networking": "$800/month",
+            "total_monthly": "$6,000/month"
+          },
+          "operational_costs": {
+            "monitoring": "$500/month",
+            "support": "$2,000/month",
+            "total_monthly": "$2,500/month"
+          },
+          "total_cost_of_ownership": {
+            "year_1": "$100,000-$150,000",
+            "year_3": "$300,000-$400,000",
+            "assumptions": [
+              "Average 200K MAU",
+              "Standard support SLAs"
+            ]
+          }
+        },
+        "integration_apis": [
+          {
+            "name": "Payment Gateway API",
+            "purpose": "Processes online payments",
+            "protocol": "REST",
+            "authentication": "API Keys + TLS",
+            "endpoints": [
+              "/pay",
+              "/refund"
+            ]
+          },
+          {
+            "name": "Inventory Partner API",
+            "purpose": "Synchronizes product stock",
+            "protocol": "REST",
+            "authentication": "OAuth 2.0",
+            "endpoints": [
+              "/products/update"
+            ]
+          }
+        ],
+        "implementation_roadmap": {
+          "phase_1": {
+            "duration": "1-2 months",
+            "deliverables": [
+              "MVP architecture",
+              "Core microservices",
+              "Basic frontend"
+            ]
+          },
+          "phase_2": {
+            "duration": "3 months",
+            "deliverables": [
+              "Full service layer",
+              "Payment integration",
+              "Production infrastructure"
+            ]
+          },
+          "phase_3": {
+            "duration": "2-4 months",
+            "deliverables": [
+              "Mobile apps",
+              "Partner APIs",
+              "Automation and monitoring"
+            ]
+          }
+        },
+        "references": [
+          {
+            "type": "case_study",
+            "title": "Etsy's Evolution to Microservices",
+            "company": "Etsy",
+            "url": "https://www.infoq.com/articles/etsy-microservices-rewrite/",
+            "relevance": "Demonstrates migration to microservices for scalability and deployment agility."
+          },
+          {
+            "type": "pattern",
+            "title": "API Gateway Pattern",
+            "company": "",
+            "url": "https://martinfowler.com/articles/apigateway.html",
+            "relevance": "Reference for central routing in distributed systems."
+          }
+        ],
+        "trade_off_justifications": [
+          {
+            "decision": "Microservices vs. Monolith",
+            "alternatives": [
+              "Monolithic app",
+              "Microservices"
+            ],
+            "rationale": "Microservices allow for independent deployment and scaling, better fitting rapid feature iteration and high-load variability.",
+            "real_world_example": "Etsy, Amazon"
+          },
+          {
+            "decision": "Managed Cloud Database",
+            "alternatives": [
+              "Self-hosted DB",
+              "Cloud-managed DB"
+            ],
+            "rationale": "Cloud-managed offers automated updates, backup, and failover, reducing operational overhead.",
+            "real_world_example": "Airbnb"
+          }
+        ]
+      }
+    },
+    "metadata": {
+      "agent_name": "Documentation Generator Agent",
+      "timestamp": "2024-06-12T18:00:00Z"
+    }
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "status": "success",
+  "result": {
+    "research_findings": {
+      "patterns": [
+        {
+          "name": "Circuit Breaker Pattern",
+          "description": "Prevents cascading failures by stopping requests to failing services",
+          "companies": ["Netflix", "Amazon"],
+          "use_case": "Payment service resilience",
+          "implementation": "Hystrix, Resilience4j",
+          "benefits": ["Prevents cascading failures", "Graceful degradation", "Faster failure detection"]
+        },
+        {
+          "name": "Database Sharding",
+          "description": "Horizontal partitioning of data across multiple databases",
+          "companies": ["Amazon", "Uber"],
+          "use_case": "User and order data scaling",
+          "implementation": "Consistent hashing, range-based sharding",
+          "benefits": ["Horizontal scalability", "Improved query performance", "Fault isolation"]
+        },
+        {
+          "name": "Event Sourcing",
+          "description": "Store state changes as sequence of events",
+          "companies": ["Amazon", "Shopify"],
+          "use_case": "Order processing and inventory management",
+          "implementation": "Kafka, Event Store",
+          "benefits": ["Complete audit trail", "Temporal queries", "Easy state reconstruction"]
+        },
+        {
+          "name": "CQRS (Command Query Responsibility Segregation)",
+          "description": "Separate read and write operations for optimization",
+          "companies": ["Netflix", "Microsoft"],
+          "use_case": "Product catalog and search",
+          "implementation": "Separate read/write databases, eventual consistency",
+          "benefits": ["Independent scaling", "Optimized queries", "Better performance"]
+        }
+      ],
+      "company_case_studies": [
+        {
+          "company": "Amazon",
+          "architecture": "Cell-Based Architecture",
+          "problem": "Blast radius reduction in distributed systems",
+          "solution": "Partition workload into isolated cells with independent failure domains",
+          "results": "Reduced impact of failures from entire region to single cell",
+          "key_learnings": ["Bulkhead isolation", "Shuffle sharding", "Independent deployment units"],
+          "applicability": "High - suitable for multi-tenant e-commerce platform"
+        },
+        {
+          "company": "Netflix",
+          "architecture": "Chaos Engineering + Circuit Breakers",
+          "problem": "Unpredictable failures in microservices",
+          "solution": "Proactive failure injection with Hystrix circuit breakers",
+          "results": "99.99% uptime despite service failures",
+          "key_learnings": ["Design for failure", "Graceful degradation", "Automated recovery"],
+          "applicability": "High - critical for payment and order services"
+        },
+        {
+          "company": "Shopify",
+          "architecture": "Event-Driven Order Processing",
+          "problem": "Flash sale traffic spikes causing order delays",
+          "solution": "Kafka-based event streaming with buffering and async processing",
+          "results": "Handled 10x traffic increase during Black Friday",
+          "key_learnings": ["Queue-based buffering", "Idempotent processing", "Rate limiting"],
+          "applicability": "High - essential for handling peak loads"
+        },
+        {
+          "company": "Uber",
+          "architecture": "Schemaless Database + Multi-Region Replication",
+          "problem": "Database scalability and availability",
+          "solution": "MySQL sharding with eventual consistency and multi-master replication",
+          "results": "Millions of transactions per second across regions",
+          "key_learnings": ["Append-only architecture", "Conflict-free replication", "Geographic distribution"],
+          "applicability": "Medium - good for user data, complex for transactions"
+        }
+      ],
+      "fault_tolerance_strategies": [
+        {
+          "strategy": "Multi-Region Active-Active Deployment",
+          "description": "Deploy services across multiple AWS regions with automatic failover",
+          "companies": ["Amazon", "Netflix"],
+          "components": ["Route53 health checks", "Cross-region replication", "Global load balancing"],
+          "recovery_time": "< 1 minute",
+          "data_consistency": "Eventual consistency with CRDTs"
+        },
+        {
+          "strategy": "Service Mesh with Retry Policies",
+          "description": "Automatic request retries with exponential backoff",
+          "companies": ["Google", "Lyft"],
+          "implementation": "Istio, Linkerd",
+          "parameters": ["Max retries: 3", "Backoff: exponential", "Timeout: 5s"],
+          "trade_offs": "Increased latency vs higher success rate"
+        },
+        {
+          "strategy": "Distributed Caching with Write-Through",
+          "description": "Redis cluster for session and frequently accessed data",
+          "companies": ["Twitter", "Pinterest"],
+          "configuration": "Redis Cluster with 6 nodes (3 masters, 3 replicas)",
+          "failover": "Automatic with Redis Sentinel",
+          "cache_hit_ratio": "95%+ for session data"
+        },
+        {
+          "strategy": "Database Replication with Automatic Failover",
+          "description": "PostgreSQL streaming replication with Patroni",
+          "companies": ["Zalando", "Instagram"],
+          "topology": "1 primary + 2 sync replicas + 2 async replicas",
+          "failover_time": "< 30 seconds",
+          "data_loss": "Zero for synchronous replicas"
+        }
+      ],
+      "trade_offs": [
+        {
+          "decision": "Eventual Consistency vs Strong Consistency",
+          "option_a": {
+            "choice": "Eventual Consistency",
+            "pros": ["Higher availability", "Better performance", "Easier scaling"],
+            "cons": ["Temporary data inconsistency", "Complex conflict resolution"],
+            "best_for": "Inventory display, product catalog"
+          },
+          "option_b": {
+            "choice": "Strong Consistency",
+            "pros": ["Data accuracy guaranteed", "Simpler logic"],
+            "cons": ["Lower availability", "Performance bottlenecks", "Scaling challenges"],
+            "best_for": "Payment processing, order confirmation"
+          },
+          "recommendation": "Hybrid approach: strong consistency for payments, eventual for catalog",
+          "companies_using": ["Amazon (hybrid)", "eBay (hybrid)"]
+        },
+        {
+          "decision": "Synchronous vs Asynchronous Communication",
+          "option_a": {
+            "choice": "Synchronous (REST/gRPC)",
+            "pros": ["Immediate response", "Simpler debugging", "Strong consistency"],
+            "cons": ["Tight coupling", "Cascading failures", "Latency accumulation"],
+            "best_for": "User authentication, payment authorization"
+          },
+          "option_b": {
+            "choice": "Asynchronous (Message Queue)",
+            "pros": ["Loose coupling", "Better fault tolerance", "Natural buffering"],
+            "cons": ["Eventual consistency", "Complex error handling", "Message ordering"],
+            "best_for": "Order processing, inventory updates, notifications"
+          },
+          "recommendation": "Use sync for critical path, async for background processing",
+          "companies_using": ["Shopify (async for orders)", "Stripe (sync for payments)"]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Amazon Builders' Library - Avoiding fallback in distributed systems",
+          "url": "aws.amazon.com/builders-library",
+          "relevance": "Cell-based architecture patterns"
+        },
+        {
+          "title": "Netflix Tech Blog - Hystrix Circuit Breaker",
+          "url": "netflixtechblog.com",
+          "relevance": "Fault tolerance implementation"
+        },
+        {
+          "title": "Shopify Engineering - Black Friday Infrastructure",
+          "url": "shopify.engineering",
+          "relevance": "Event-driven scaling strategies"
+        },
+        {
+          "title": "Uber Engineering Blog - Schemaless",
+          "url": "eng.uber.com",
+          "relevance": "Database scaling patterns"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "agent_name": "Architecture Research Agent",
+    "timestamp": "2026-02-06T10:30:00Z",
+    "search_queries_executed": 8,
+    "sources_analyzed": 12
+  }
+}

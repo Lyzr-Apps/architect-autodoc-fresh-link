@@ -1,0 +1,219 @@
+{
+  "status": "success",
+  "result": {
+    "architecture": {
+      "overview": "Cloud-native microservices architecture leveraging proven patterns from Amazon's cell-based isolation and Netflix's fault tolerance strategies. The system is designed for horizontal scalability, multi-region deployment, and graceful degradation under failure scenarios.",
+      "architecture_style": "Microservices with Event-Driven Architecture",
+      "components": [
+        {
+          "name": "API Gateway",
+          "type": "Edge Service",
+          "purpose": "Single entry point for all client requests with routing, rate limiting, and authentication",
+          "technologies": ["Kong Gateway", "OAuth2/JWT", "Redis"],
+          "interfaces": {
+            "inbound": ["HTTPS/443", "WebSocket/443"],
+            "outbound": ["Internal service mesh"]
+          },
+          "scalability": "Horizontal auto-scaling (min: 3, max: 50 instances) based on request rate",
+          "fault_tolerance": "Multi-AZ deployment with health checks, circuit breakers for downstream services"
+        },
+        {
+          "name": "User Service",
+          "type": "Microservice",
+          "purpose": "User authentication, profile management, and session handling",
+          "technologies": ["Node.js", "Express", "PostgreSQL", "Redis"],
+          "interfaces": {
+            "api": ["POST /api/users/register", "POST /api/users/login", "GET /api/users/profile"],
+            "events_consumed": ["user.verified", "user.updated"],
+            "events_published": ["user.created", "user.deleted"]
+          },
+          "scalability": "Stateless design with database read replicas (1 primary + 3 replicas)",
+          "fault_tolerance": "Circuit breaker for database connections, fallback to cached profiles"
+        },
+        {
+          "name": "Payment Service",
+          "type": "Microservice (PCI-DSS Isolated)",
+          "purpose": "Secure payment processing with tokenization and PCI-DSS compliance",
+          "technologies": ["Java Spring Boot", "Stripe SDK", "HashiCorp Vault", "PostgreSQL"],
+          "interfaces": {
+            "api": ["POST /api/payments/authorize", "POST /api/payments/capture", "POST /api/payments/refund"],
+            "events_consumed": ["order.created", "order.cancelled"],
+            "events_published": ["payment.authorized", "payment.failed", "payment.completed"]
+          },
+          "scalability": "Queue-based buffering with Kafka, async processing workers",
+          "fault_tolerance": "Idempotency keys, retry with exponential backoff, compensation transactions"
+        },
+        {
+          "name": "Order Service",
+          "type": "Microservice",
+          "purpose": "Order creation, processing, and state management using saga pattern",
+          "technologies": ["Go", "Apache Kafka", "MongoDB", "Redis"],
+          "interfaces": {
+            "api": ["POST /api/orders", "GET /api/orders/:id", "PUT /api/orders/:id/cancel"],
+            "events_consumed": ["payment.authorized", "inventory.reserved", "shipping.confirmed"],
+            "events_published": ["order.created", "order.confirmed", "order.shipped", "order.cancelled"]
+          },
+          "scalability": "Event-driven async processing, MongoDB sharding by customer_id",
+          "fault_tolerance": "Saga orchestration with compensating transactions, dead letter queues"
+        },
+        {
+          "name": "Inventory Service",
+          "type": "Microservice",
+          "purpose": "Real-time inventory tracking with eventual consistency",
+          "technologies": ["Python FastAPI", "Redis", "PostgreSQL", "Kafka"],
+          "interfaces": {
+            "api": ["GET /api/inventory/:product_id", "POST /api/inventory/reserve"],
+            "events_consumed": ["order.created", "order.cancelled"],
+            "events_published": ["inventory.reserved", "inventory.released", "inventory.low"]
+          },
+          "scalability": "Write-through cache (Redis) with PostgreSQL as source of truth",
+          "fault_tolerance": "Event sourcing for audit trail, compensating transactions for reservations"
+        },
+        {
+          "name": "Notification Service",
+          "type": "Microservice",
+          "purpose": "Multi-channel notifications (email, SMS, push) for order updates",
+          "technologies": ["Node.js", "SendGrid", "Twilio", "Firebase Cloud Messaging"],
+          "interfaces": {
+            "events_consumed": ["order.confirmed", "payment.completed", "order.shipped"],
+            "events_published": ["notification.sent", "notification.failed"]
+          },
+          "scalability": "Worker pool with priority queues",
+          "fault_tolerance": "Retry logic with exponential backoff, dead letter queue for failures"
+        }
+      ],
+      "tech_stack": {
+        "frontend": {
+          "web": ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+          "mobile": ["React Native", "TypeScript"]
+        },
+        "backend": {
+          "languages": ["Node.js", "Java", "Go", "Python"],
+          "frameworks": ["Express", "Spring Boot", "Gin", "FastAPI"],
+          "api": ["REST", "GraphQL", "gRPC for internal communication"]
+        },
+        "database": {
+          "relational": ["PostgreSQL 14+ with Patroni for HA"],
+          "document": ["MongoDB 6.0+ with sharding"],
+          "cache": ["Redis 7.0+ Cluster mode"],
+          "search": ["Elasticsearch 8.0+"]
+        },
+        "message_queue": ["Apache Kafka 3.0+", "Redis Streams for low-latency events"],
+        "infrastructure": {
+          "cloud": "AWS (primary), GCP (DR site)",
+          "orchestration": "Kubernetes (EKS)",
+          "iac": "Terraform",
+          "service_mesh": "Istio",
+          "secrets": "HashiCorp Vault"
+        },
+        "monitoring": {
+          "metrics": "Prometheus + Grafana",
+          "logging": "ELK Stack (Elasticsearch, Logstash, Kibana)",
+          "tracing": "Jaeger",
+          "apm": "Datadog"
+        }
+      },
+      "patterns_applied": [
+        {
+          "pattern": "Circuit Breaker",
+          "location": "All inter-service communication",
+          "implementation": "Resilience4j library",
+          "reference": "Netflix Hystrix pattern"
+        },
+        {
+          "pattern": "Saga Pattern",
+          "location": "Order processing workflow",
+          "implementation": "Orchestration-based saga with compensating transactions",
+          "reference": "Amazon order processing"
+        },
+        {
+          "pattern": "Event Sourcing",
+          "location": "Inventory and order services",
+          "implementation": "Kafka as event store",
+          "reference": "Shopify order history"
+        },
+        {
+          "pattern": "CQRS",
+          "location": "Product catalog",
+          "implementation": "Separate read (Elasticsearch) and write (PostgreSQL) models",
+          "reference": "Microsoft Azure patterns"
+        },
+        {
+          "pattern": "Database Sharding",
+          "location": "User and order data",
+          "implementation": "Consistent hashing by customer_id",
+          "reference": "Uber Schemaless"
+        }
+      ],
+      "trade_off_decisions": [
+        {
+          "decision": "Eventual consistency for inventory display",
+          "chosen": "Eventual Consistency",
+          "alternatives": ["Strong consistency with distributed locks"],
+          "reasoning": "Inventory display can tolerate slight delays; prioritize availability and performance over perfect accuracy",
+          "trade_offs": {
+            "benefits": ["Higher availability (99.99%)", "Lower latency (< 100ms)", "Better scalability"],
+            "costs": ["Potential overselling (mitigated by reservation system)", "Complex conflict resolution"]
+          },
+          "mitigation": "Two-phase reservation (soft reserve on display, hard reserve on checkout)",
+          "reference": "Amazon's approach to inventory management"
+        },
+        {
+          "decision": "Microservices over monolith",
+          "chosen": "Microservices Architecture",
+          "alternatives": ["Modular monolith", "Service-oriented architecture"],
+          "reasoning": "Need independent scaling, team autonomy, and technology flexibility",
+          "trade_offs": {
+            "benefits": ["Independent deployment", "Technology diversity", "Fault isolation", "Team scalability"],
+            "costs": ["Operational complexity", "Distributed debugging", "Network latency", "Data consistency challenges"]
+          },
+          "mitigation": "Service mesh (Istio) for observability, standardized deployment templates",
+          "reference": "Netflix microservices journey"
+        },
+        {
+          "decision": "Multi-region active-active",
+          "chosen": "Active-Active Deployment",
+          "alternatives": ["Active-passive with failover", "Single region with multi-AZ"],
+          "reasoning": "Global customer base requires low latency and high availability",
+          "trade_offs": {
+            "benefits": ["< 100ms latency globally", "No failover downtime", "Geographic redundancy"],
+            "costs": ["Higher infrastructure cost (2x)", "Complex data synchronization", "Cross-region network costs"]
+          },
+          "mitigation": "Eventual consistency with conflict-free replicated data types (CRDTs)",
+          "reference": "Amazon Route53 active-active patterns"
+        }
+      ],
+      "data_flow": {
+        "read_path": "Client → CDN (static) → API Gateway → Service (check cache) → Database (if miss) → Cache update → Response",
+        "write_path": "Client → API Gateway → Service → Database (primary) → Event published → Cache invalidation → Replicas updated",
+        "consistency_model": "Hybrid: Strong for payments/orders, Eventual for catalog/inventory"
+      },
+      "scalability_mechanisms": [
+        "Horizontal pod autoscaling (HPA) based on CPU/memory and custom metrics (request rate)",
+        "Database read replicas with connection pooling (PgBouncer)",
+        "CDN for static assets and API responses (CloudFront)",
+        "Database sharding by customer_id for user and order data",
+        "Redis cluster for distributed caching and session management",
+        "Kafka partitioning for parallel event processing",
+        "Auto-scaling groups with predictive scaling for known peak times"
+      ],
+      "fault_tolerance_mechanisms": [
+        "Multi-AZ deployment (minimum 3 availability zones)",
+        "Multi-region active-active (US-East, EU-West, AP-Southeast)",
+        "Circuit breakers on all external calls (Resilience4j)",
+        "Retry policies with exponential backoff and jitter",
+        "Health checks at load balancer and orchestration layers",
+        "Graceful degradation (fallback to cached data)",
+        "Bulkhead isolation (separate thread pools per dependency)",
+        "Dead letter queues for failed message processing",
+        "Database automatic failover (Patroni for PostgreSQL)",
+        "Regular chaos engineering experiments (Netflix Chaos Monkey)"
+      ]
+    }
+  },
+  "metadata": {
+    "agent_name": "Architecture Designer Agent",
+    "timestamp": "2026-02-06T10:30:00Z",
+    "patterns_referenced": ["Netflix", "Amazon", "Shopify", "Uber"]
+  }
+}

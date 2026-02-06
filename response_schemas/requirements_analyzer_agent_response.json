@@ -1,0 +1,149 @@
+{
+  "agent_name": "Requirements Analyzer Agent",
+  "agent_id": "698584b62237a2c55706afdc",
+  "agent_purpose": "requirements_analysis",
+  "description": "Extracts and structures client requirements including technical constraints, business objectives, compliance needs, scalability targets, and integration requirements",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "requirements": {
+        "client_objectives": [
+          "string"
+        ],
+        "business_goals": [
+          "string"
+        ],
+        "technical_constraints": [
+          "string"
+        ],
+        "scalability_targets": {
+          "users": "string",
+          "throughput": "string",
+          "data_volume": "string",
+          "geographic_regions": [
+            "string"
+          ]
+        },
+        "compliance_needs": [
+          "string"
+        ],
+        "integration_requirements": [
+          {
+            "system": "string",
+            "type": "string",
+            "criticality": "string"
+          }
+        ],
+        "non_functional_requirements": {
+          "availability": "string",
+          "latency": "string",
+          "data_retention": "string"
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "requirements": {
+        "client_objectives": [
+          "Develop an e-commerce platform",
+          "Support both mobile and web clients",
+          "Provide real-time inventory management"
+        ],
+        "business_goals": [
+          "Enable online sales with secure payment processing",
+          "Handle high user concurrency to support business growth",
+          "Maintain up-to-date inventory information for users"
+        ],
+        "technical_constraints": [
+          "Must support payment gateway integration",
+          "Must enable real-time inventory updates"
+        ],
+        "scalability_targets": {
+          "users": "100,000 concurrent users",
+          "throughput": "Not specified; clarification needed on expected transactions per second",
+          "data_volume": "Not specified; clarification needed on expected product, order, and user data sizes",
+          "geographic_regions": [
+            "Not specified; clarification needed if the platform is global or regional"
+          ]
+        },
+        "compliance_needs": [
+          "PCI-DSS"
+        ],
+        "integration_requirements": [
+          {
+            "system": "Payment Gateway",
+            "type": "API integration",
+            "criticality": "high"
+          }
+        ],
+        "non_functional_requirements": {
+          "availability": "Not specified; clarification needed on target uptime (e.g., 99.9%)",
+          "latency": "Not specified; clarification needed on acceptable response times",
+          "data_retention": "Not specified; clarification needed on order, user, and transaction data retention policies"
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "Requirements Analyzer Agent",
+      "timestamp": "2024-06-23T08:52:36Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-06T06:13:49.687973",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "requirements": {
+        "client_objectives": [
+          "Develop an e-commerce platform",
+          "Support both mobile and web clients",
+          "Provide real-time inventory management"
+        ],
+        "business_goals": [
+          "Enable online sales with secure payment processing",
+          "Handle high user concurrency to support business growth",
+          "Maintain up-to-date inventory information for users"
+        ],
+        "technical_constraints": [
+          "Must support payment gateway integration",
+          "Must enable real-time inventory updates"
+        ],
+        "scalability_targets": {
+          "users": "100,000 concurrent users",
+          "throughput": "Not specified; clarification needed on expected transactions per second",
+          "data_volume": "Not specified; clarification needed on expected product, order, and user data sizes",
+          "geographic_regions": [
+            "Not specified; clarification needed if the platform is global or regional"
+          ]
+        },
+        "compliance_needs": [
+          "PCI-DSS"
+        ],
+        "integration_requirements": [
+          {
+            "system": "Payment Gateway",
+            "type": "API integration",
+            "criticality": "high"
+          }
+        ],
+        "non_functional_requirements": {
+          "availability": "Not specified; clarification needed on target uptime (e.g., 99.9%)",
+          "latency": "Not specified; clarification needed on acceptable response times",
+          "data_retention": "Not specified; clarification needed on order, user, and transaction data retention policies"
+        }
+      }
+    },
+    "metadata": {
+      "agent_name": "Requirements Analyzer Agent",
+      "timestamp": "2024-06-23T08:52:36Z"
+    }
+  },
+  "test_passed": true
+}
