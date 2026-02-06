@@ -126,6 +126,159 @@ const getComponentColor = (type: string) => {
   return 'from-slate-500 to-slate-700'
 }
 
+interface ComponentEditorProps {
+  component: Component
+  onSave: (component: Component) => void
+  onCancel: () => void
+}
+
+function ComponentEditor({ component, onSave, onCancel }: ComponentEditorProps) {
+  const [editedComponent, setEditedComponent] = useState<Component>(component)
+  const [newTech, setNewTech] = useState('')
+
+  const handleAddTechnology = () => {
+    if (newTech.trim() && !editedComponent.technologies.includes(newTech.trim())) {
+      setEditedComponent({
+        ...editedComponent,
+        technologies: [...editedComponent.technologies, newTech.trim()]
+      })
+      setNewTech('')
+    }
+  }
+
+  const handleRemoveTechnology = (tech: string) => {
+    setEditedComponent({
+      ...editedComponent,
+      technologies: editedComponent.technologies.filter(t => t !== tech)
+    })
+  }
+
+  return (
+    <Card className="bg-slate-800/50 border-blue-700 backdrop-blur sticky top-6">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white flex items-center gap-2">
+            <Server className="w-5 h-5 text-blue-400" />
+            Edit Component
+          </CardTitle>
+          <button
+            onClick={onCancel}
+            className="text-slate-400 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="text-sm font-semibold text-slate-300 mb-2 block">Name</label>
+          <input
+            type="text"
+            value={editedComponent.name}
+            onChange={(e) => setEditedComponent({ ...editedComponent, name: e.target.value })}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-slate-300 mb-2 block">Type</label>
+          <input
+            type="text"
+            value={editedComponent.type}
+            onChange={(e) => setEditedComponent({ ...editedComponent, type: e.target.value })}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-slate-300 mb-2 block">Purpose</label>
+          <Textarea
+            value={editedComponent.purpose}
+            onChange={(e) => setEditedComponent({ ...editedComponent, purpose: e.target.value })}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 min-h-[80px]"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-slate-300 mb-2 block">Technologies</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={newTech}
+              onChange={(e) => setNewTech(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddTechnology()}
+              placeholder="Add technology..."
+              className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+            />
+            <Button
+              onClick={handleAddTechnology}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Add
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {editedComponent.technologies.map((tech, i) => (
+              <span key={i} className="flex items-center gap-1.5 bg-teal-900/30 text-teal-300 px-3 py-1.5 rounded-lg text-sm">
+                {getTechIcon(tech)}
+                {tech}
+                <button
+                  onClick={() => handleRemoveTechnology(tech)}
+                  className="ml-1 text-red-400 hover:text-red-300"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-slate-700 pt-4">
+          <label className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-yellow-400" />
+            Scalability
+          </label>
+          <Textarea
+            value={editedComponent.scalability}
+            onChange={(e) => setEditedComponent({ ...editedComponent, scalability: e.target.value })}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 min-h-[60px]"
+          />
+        </div>
+
+        <div className="border-t border-slate-700 pt-4">
+          <label className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-green-400" />
+            Fault Tolerance
+          </label>
+          <Textarea
+            value={editedComponent.fault_tolerance}
+            onChange={(e) => setEditedComponent({ ...editedComponent, fault_tolerance: e.target.value })}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 min-h-[60px]"
+          />
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <Button
+            onClick={() => onSave(editedComponent)}
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+          >
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Save Changes
+          </Button>
+          <Button
+            onClick={onCancel}
+            variant="outline"
+            className="border-slate-600 text-slate-300"
+          >
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function Home() {
   const [systemRequirements, setSystemRequirements] = useState('')
   const [loading, setLoading] = useState(false)
@@ -134,6 +287,9 @@ export default function Home() {
   const [selectedComponent, setSelectedComponent] = useState<Component | null>(null)
   const [showTradeOffs, setShowTradeOffs] = useState(false)
   const [showValidation, setShowValidation] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [editingComponent, setEditingComponent] = useState<Component | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   const handleGenerate = async () => {
     if (!systemRequirements.trim()) {
@@ -265,6 +421,80 @@ Please analyze these requirements and provide a comprehensive system design with
     setSelectedComponent(null)
     setShowTradeOffs(false)
     setShowValidation(false)
+    setEditMode(false)
+    setEditingComponent(null)
+  }
+
+  const handleSaveComponent = (updatedComponent: Component) => {
+    if (!systemDesign) return
+
+    const updatedComponents = systemDesign.architecture.components?.map(c =>
+      c.name === updatedComponent.name ? updatedComponent : c
+    )
+
+    setSystemDesign({
+      ...systemDesign,
+      architecture: {
+        ...systemDesign.architecture,
+        components: updatedComponents
+      }
+    })
+
+    setEditingComponent(null)
+    setSelectedComponent(updatedComponent)
+  }
+
+  const handleExport = () => {
+    if (!systemDesign) return
+
+    setExporting(true)
+
+    // Create comprehensive report
+    const report = {
+      metadata: {
+        project_name: systemDesign.project_name,
+        architecture_style: systemDesign.architecture.architecture_style,
+        version: systemDesign.version,
+        generated_at: new Date().toISOString()
+      },
+      requirements: systemDesign.requirements,
+      research: systemDesign.research,
+      architecture: {
+        overview: systemDesign.architecture.overview || systemDesign.architecture.summary,
+        style: systemDesign.architecture.architecture_style,
+        components: systemDesign.architecture.components,
+        data_flow: systemDesign.architecture.details?.data_flow,
+        scalability_mechanisms: systemDesign.architecture.details?.scalability_mechanisms,
+        fault_tolerance: systemDesign.architecture.details?.fault_tolerance
+      },
+      trade_offs: systemDesign.architecture.trade_off_decisions,
+      validation: {
+        overall_assessment: systemDesign.validation.overall_assessment,
+        summary: systemDesign.validation.summary,
+        potential_issues: systemDesign.validation.potential_issues,
+        critical_issues: systemDesign.validation.critical_issues,
+        details: systemDesign.validation.details
+      },
+      cost_estimation: systemDesign.documentation?.cost_estimation,
+      documentation: {
+        summary: systemDesign.documentation?.summary,
+        executive_summary: systemDesign.documentation?.executive_summary,
+        details: systemDesign.documentation?.details
+      }
+    }
+
+    // Download as JSON
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${systemDesign.project_name.replace(/\s+/g, '_')}_System_Design_Report.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    setTimeout(() => setExporting(false), 1000)
   }
 
   // Input Screen
@@ -373,6 +603,22 @@ Please analyze these requirements and provide a comprehensive system design with
               Validation
             </Button>
             <Button
+              onClick={() => setEditMode(!editMode)}
+              variant="outline"
+              className={editMode ? "border-blue-600 text-blue-400 bg-blue-950" : "border-blue-600 text-blue-400 hover:bg-blue-950"}
+            >
+              <Server className="w-4 h-4 mr-2" />
+              {editMode ? 'View Mode' : 'Edit Mode'}
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={exporting}
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              {exporting ? 'Exporting...' : 'Export Report'}
+            </Button>
+            <Button
               onClick={handleReset}
               variant="outline"
               className="border-slate-600 text-slate-300"
@@ -411,13 +657,27 @@ Please analyze these requirements and provide a comprehensive system design with
                     {(systemDesign.architecture.components || []).map((component, idx) => (
                       <button
                         key={idx}
-                        onClick={() => setSelectedComponent(component)}
-                        className={`p-4 rounded-lg border-2 transition-all text-left group hover:scale-105 ${
+                        onClick={() => {
+                          if (editMode) {
+                            setEditingComponent(component)
+                            setSelectedComponent(null)
+                          } else {
+                            setSelectedComponent(component)
+                          }
+                        }}
+                        className={`p-4 rounded-lg border-2 transition-all text-left group hover:scale-105 relative ${
                           selectedComponent?.name === component.name
                             ? 'border-teal-500 shadow-lg shadow-teal-500/20'
+                            : editingComponent?.name === component.name
+                            ? 'border-blue-500 shadow-lg shadow-blue-500/20'
                             : 'border-slate-700 hover:border-teal-600'
                         }`}
                       >
+                        {editMode && (
+                          <div className="absolute top-2 right-2 bg-blue-600 text-white p-1 rounded">
+                            <Server className="w-3 h-3" />
+                          </div>
+                        )}
                         <div className={`w-full h-24 bg-gradient-to-br ${getComponentColor(component.type)} rounded-lg mb-3 flex items-center justify-center`}>
                           <Server className="w-10 h-10 text-white" />
                         </div>
@@ -507,7 +767,13 @@ Please analyze these requirements and provide a comprehensive system design with
 
           {/* Component Details Panel */}
           <div className="col-span-4">
-            {selectedComponent ? (
+            {editingComponent ? (
+              <ComponentEditor
+                component={editingComponent}
+                onSave={handleSaveComponent}
+                onCancel={() => setEditingComponent(null)}
+              />
+            ) : selectedComponent ? (
               <Card className="bg-slate-800/50 border-slate-700 backdrop-blur sticky top-6">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -561,7 +827,9 @@ Please analyze these requirements and provide a comprehensive system design with
                 <CardContent className="pt-6">
                   <div className="text-center py-12">
                     <Server className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                    <p className="text-slate-400 text-sm">Click on a component to view details</p>
+                    <p className="text-slate-400 text-sm">
+                      {editMode ? 'Click on a component to edit' : 'Click on a component to view details'}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
