@@ -42,24 +42,37 @@ interface Component {
 interface TradeOff {
   decision: string
   chosen?: string
-  reasoning: string
-  trade_offs: string | { benefits?: string[], costs?: string[] }
+  reasoning?: string
+  trade_offs?: string | { benefits?: string[], costs?: string[] }
   mitigation?: string
   reference?: string
 }
 
 interface Architecture {
-  overview: string
+  overview?: string
+  summary?: string
   architecture_style: string
-  components: Component[]
-  trade_off_decisions: TradeOff[]
+  components?: Component[]
+  key_components?: string[]
+  trade_off_decisions?: TradeOff[]
+  details?: {
+    overview?: string
+    data_flow?: string
+    scalability_mechanisms?: string[]
+    fault_tolerance?: string[]
+    tradeoff_decisions?: { decision: string }[]
+  }
 }
 
 interface Validation {
-  scalability_assessment: any
-  fault_tolerance_review: any
-  security_evaluation: any
-  potential_issues: any[]
+  scalability_assessment?: any
+  fault_tolerance_review?: any
+  security_evaluation?: any
+  potential_issues?: any[]
+  summary?: string
+  overall_assessment?: string
+  critical_issues?: string[]
+  details?: any
 }
 
 interface CostEstimation {
@@ -72,9 +85,15 @@ interface SystemDesign {
   version: string
   architecture: Architecture
   validation: Validation
-  documentation: {
-    cost_estimation: CostEstimation
+  requirements?: any
+  research?: any
+  documentation?: {
+    cost_estimation?: CostEstimation
+    summary?: string
+    executive_summary?: string
+    details?: any
   }
+  orchestration_notes?: string
 }
 
 const AGENT_ID = '69858585b90162af337b1e37'
@@ -141,14 +160,100 @@ Please analyze these requirements and provide a comprehensive system design with
 
       const result = await callAIAgent(message, AGENT_ID)
 
-      if (result.success && result.response.result?.system_design) {
-        setSystemDesign(result.response.result.system_design as SystemDesign)
+      console.log('=== AGENT RESPONSE DEBUG ===')
+      console.log('Success:', result.success)
+      console.log('Full result:', JSON.stringify(result, null, 2))
+      console.log('Response:', result.response)
+      console.log('Response.result:', result.response?.result)
+      console.log('===========================')
+
+      if (!result.success) {
+        console.error('Agent call failed:', result.error || 'Unknown error')
+        alert(`Failed to generate design: ${result.error || result.response?.message || 'Unknown error'}`)
+        return
+      }
+
+      // Try different possible response structures
+      let design = null
+
+      // Option 1: result.response.result.system_design
+      if (result.response?.result?.system_design) {
+        design = result.response.result.system_design
+        console.log('Found design at: result.response.result.system_design')
+      }
+      // Option 2: result.response.result (the entire result IS the system_design)
+      else if (result.response?.result?.project_name) {
+        design = result.response.result
+        console.log('Found design at: result.response.result')
+      }
+      // Option 3: result.response.result.result (double nesting)
+      else if (result.response?.result?.result?.system_design) {
+        design = result.response.result.result.system_design
+        console.log('Found design at: result.response.result.result.system_design')
+      }
+      // Option 4: Check if the manager returns it in 'design' or 'final_design'
+      else if (result.response?.result?.design) {
+        design = result.response.result.design
+        console.log('Found design at: result.response.result.design')
+      }
+      else if (result.response?.result?.final_design) {
+        design = result.response.result.final_design
+        console.log('Found design at: result.response.result.final_design')
+      }
+
+      // Check if we have a valid system design structure
+      const hasValidStructure = design &&
+        design.project_name &&
+        design.architecture &&
+        (design.architecture.components || design.architecture.key_components)
+
+      if (hasValidStructure) {
+        console.log('Successfully parsed system design')
+
+        // Transform Manager's response to match UI expectations if needed
+        if (!design.architecture.components && design.architecture.key_components) {
+          // Manager returns key_components as strings, create simplified Component objects
+          design.architecture.components = design.architecture.key_components.map((name: string, idx: number) => ({
+            name: name,
+            type: 'Component',
+            purpose: design.architecture.details?.overview || 'Core system component',
+            technologies: [],
+            scalability: design.architecture.details?.scalability_mechanisms?.[0] || 'Horizontal scaling',
+            fault_tolerance: design.architecture.details?.fault_tolerance?.[0] || 'High availability'
+          }))
+          console.log('Transformed key_components to components array')
+        }
+
+        // Transform validation structure if needed
+        if (!design.validation.potential_issues && design.validation.critical_issues) {
+          design.validation.potential_issues = design.validation.critical_issues.map((issue: string) => ({
+            issue: issue,
+            severity: 'High',
+            mitigation: 'See documentation for details'
+          }))
+          console.log('Transformed critical_issues to potential_issues array')
+        }
+
+        // Transform trade-off decisions if needed
+        if (!design.architecture.trade_off_decisions && design.architecture.details?.tradeoff_decisions) {
+          design.architecture.trade_off_decisions = design.architecture.details.tradeoff_decisions.map((td: any) => ({
+            decision: td.decision,
+            reasoning: 'See architecture details',
+            trade_offs: ''
+          }))
+          console.log('Transformed tradeoff_decisions')
+        }
+
+        setSystemDesign(design as SystemDesign)
       } else {
-        alert('Failed to generate system design. Please try again.')
+        console.error('Could not find valid system_design structure')
+        console.log('Available keys in result:', Object.keys(result.response?.result || {}))
+        console.log('Design object:', design)
+        alert('Failed to parse system design from agent response. The response structure does not match expected format. Check console for details.')
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('An error occurred. Please try again.')
+      console.error('Error generating design:', error)
+      alert(`An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
       setLoadingStage('')
@@ -257,7 +362,7 @@ Please analyze these requirements and provide a comprehensive system design with
               className="border-orange-600 text-orange-400 hover:bg-orange-950"
             >
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Trade-Offs ({systemDesign.architecture.trade_off_decisions.length})
+              Trade-Offs ({systemDesign.architecture.trade_off_decisions?.length || 0})
             </Button>
             <Button
               onClick={() => setShowValidation(!showValidation)}
@@ -293,12 +398,17 @@ Please analyze these requirements and provide a comprehensive system design with
                 <div className="bg-slate-950 rounded-lg p-6 border border-slate-700">
                   {/* Architecture Overview Badge */}
                   <div className="mb-6 p-4 bg-teal-900/20 border border-teal-800 rounded-lg">
-                    <p className="text-sm text-slate-300">{systemDesign.architecture.overview}</p>
+                    <p className="text-sm text-slate-300">
+                      {systemDesign.architecture.overview ||
+                       systemDesign.architecture.summary ||
+                       systemDesign.architecture.details?.overview ||
+                       'System architecture overview'}
+                    </p>
                   </div>
 
                   {/* Components Grid */}
                   <div className="grid grid-cols-3 gap-4">
-                    {systemDesign.architecture.components.map((component, idx) => (
+                    {(systemDesign.architecture.components || []).map((component, idx) => (
                       <button
                         key={idx}
                         onClick={() => setSelectedComponent(component)}
@@ -354,7 +464,7 @@ Please analyze these requirements and provide a comprehensive system design with
                     <div>
                       <p className="text-xs text-slate-400">Monthly Cost</p>
                       <p className="text-lg font-bold text-white">
-                        {systemDesign.documentation.cost_estimation.monthly_estimate || 'N/A'}
+                        {systemDesign.documentation?.cost_estimation?.monthly_estimate || 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -370,7 +480,7 @@ Please analyze these requirements and provide a comprehensive system design with
                     <div>
                       <p className="text-xs text-slate-400">Components</p>
                       <p className="text-lg font-bold text-white">
-                        {systemDesign.architecture.components.length}
+                        {systemDesign.architecture.components?.length || 0}
                       </p>
                     </div>
                   </div>
@@ -386,7 +496,7 @@ Please analyze these requirements and provide a comprehensive system design with
                     <div>
                       <p className="text-xs text-slate-400">Issues Found</p>
                       <p className="text-lg font-bold text-white">
-                        {systemDesign.validation.potential_issues.length}
+                        {systemDesign.validation.potential_issues?.length || 0}
                       </p>
                     </div>
                   </div>
@@ -472,10 +582,10 @@ Please analyze these requirements and provide a comprehensive system design with
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
-                  {systemDesign.architecture.trade_off_decisions.map((tradeoff, idx) => (
+                  {(systemDesign.architecture.trade_off_decisions || []).map((tradeoff, idx) => (
                     <div key={idx} className="bg-slate-900/50 border border-orange-800/30 rounded-lg p-3">
                       <h5 className="text-white font-semibold mb-2 text-sm">{tradeoff.decision}</h5>
-                      <p className="text-xs text-slate-400 mb-2">{tradeoff.reasoning}</p>
+                      {tradeoff.reasoning && <p className="text-xs text-slate-400 mb-2">{tradeoff.reasoning}</p>}
                       {typeof tradeoff.trade_offs === 'object' && (
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           {tradeoff.trade_offs.benefits && (
@@ -523,7 +633,7 @@ Please analyze these requirements and provide a comprehensive system design with
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
-                  {systemDesign.validation.potential_issues.map((issue: any, idx: number) => (
+                  {(systemDesign.validation.potential_issues || []).map((issue: any, idx: number) => (
                     <div key={idx} className="bg-slate-900/50 border border-teal-800/30 rounded-lg p-3">
                       <div className="flex items-start justify-between mb-2">
                         <h5 className="text-white font-semibold text-sm">{issue.issue}</h5>
