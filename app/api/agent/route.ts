@@ -160,6 +160,20 @@ export async function POST(request: NextRequest) {
     if (response.ok) {
       const parsed = parseLLMJson(rawText)
 
+      // Check for credits exhausted error
+      if (parsed?.detail && parsed.detail.toLowerCase().includes('credits exhausted')) {
+        return NextResponse.json({
+          success: false,
+          response: {
+            status: 'error',
+            result: {},
+            message: 'API credits exhausted. Please add credits to your Lyzr account to continue.',
+          },
+          error: 'API credits exhausted',
+          raw_response: rawText,
+        })
+      }
+
       if (parsed?.success === false && parsed?.error) {
         return NextResponse.json({
           success: false,
@@ -188,7 +202,12 @@ export async function POST(request: NextRequest) {
       let errorMsg = `API returned status ${response.status}`
       try {
         const errorData = parseLLMJson(rawText) || JSON.parse(rawText)
-        errorMsg = errorData?.error || errorData?.message || errorMsg
+        // Check for credits exhausted in error responses
+        if (errorData?.detail && typeof errorData.detail === 'string' && errorData.detail.toLowerCase().includes('credits exhausted')) {
+          errorMsg = 'API credits exhausted. Please add credits to your Lyzr account to continue.'
+        } else {
+          errorMsg = errorData?.error || errorData?.message || errorData?.detail || errorMsg
+        }
       } catch {}
 
       return NextResponse.json(
