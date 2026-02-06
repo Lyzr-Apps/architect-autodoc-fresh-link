@@ -290,6 +290,351 @@ export default function Home() {
   const [editMode, setEditMode] = useState(false)
   const [editingComponent, setEditingComponent] = useState<Component | null>(null)
   const [exporting, setExporting] = useState(false)
+  const [useDemoMode, setUseDemoMode] = useState(false)
+
+  const generateMockDesign = (requirements: string): SystemDesign => {
+    const isEcommerce = requirements.toLowerCase().includes('commerce') || requirements.toLowerCase().includes('shopping')
+    const isSocial = requirements.toLowerCase().includes('social') || requirements.toLowerCase().includes('messaging')
+    const isHealthcare = requirements.toLowerCase().includes('health') || requirements.toLowerCase().includes('medical')
+
+    let projectName = 'System Design'
+    let components: Component[] = []
+    let tradeOffs: TradeOff[] = []
+    let issues: any[] = []
+
+    if (isEcommerce) {
+      projectName = 'E-Commerce Platform'
+      components = [
+        {
+          name: 'API Gateway',
+          type: 'Edge Service',
+          purpose: 'Entry point for all client requests, handles authentication, rate limiting, and request routing',
+          technologies: ['Kong', 'NGINX', 'AWS API Gateway'],
+          scalability: 'Horizontally scalable with auto-scaling groups based on request throughput',
+          fault_tolerance: 'Multi-region deployment with health checks and automatic failover'
+        },
+        {
+          name: 'Product Service',
+          type: 'Microservice',
+          purpose: 'Manages product catalog, inventory tracking, and product search functionality',
+          technologies: ['Node.js', 'Elasticsearch', 'Redis'],
+          scalability: 'Containerized with Kubernetes, scales based on search query volume',
+          fault_tolerance: 'Circuit breaker pattern, multiple replicas, data replication'
+        },
+        {
+          name: 'Payment Service',
+          type: 'Microservice',
+          purpose: 'Handles payment processing, PCI-DSS compliant transactions, and payment gateway integration',
+          technologies: ['Java', 'Stripe API', 'PostgreSQL'],
+          scalability: 'Dedicated instances with reserved capacity for peak traffic',
+          fault_tolerance: 'Redundant payment processors, transaction logs, idempotent operations'
+        },
+        {
+          name: 'Order Service',
+          type: 'Microservice',
+          purpose: 'Manages order lifecycle, order processing, and fulfillment workflows',
+          technologies: ['Python', 'Kafka', 'MongoDB'],
+          scalability: 'Event-driven architecture with message queue buffering',
+          fault_tolerance: 'Saga pattern for distributed transactions, compensating transactions'
+        },
+        {
+          name: 'User Service',
+          type: 'Microservice',
+          purpose: 'User authentication, profile management, and session handling',
+          technologies: ['Node.js', 'JWT', 'PostgreSQL'],
+          scalability: 'Stateless design with session stored in Redis for horizontal scaling',
+          fault_tolerance: 'Database replication, session backup, OAuth fallback'
+        },
+        {
+          name: 'PostgreSQL Cluster',
+          type: 'Primary Database',
+          purpose: 'Stores transactional data including users, orders, and payment records',
+          technologies: ['PostgreSQL', 'AWS RDS', 'Patroni'],
+          scalability: 'Read replicas for scaling read operations, connection pooling',
+          fault_tolerance: 'Multi-AZ deployment, automated backups, point-in-time recovery'
+        },
+        {
+          name: 'Redis Cache',
+          type: 'Cache Layer',
+          purpose: 'Caches frequently accessed data like product listings, user sessions, and search results',
+          technologies: ['Redis', 'ElastiCache'],
+          scalability: 'Redis Cluster mode for horizontal scaling, sharding by key',
+          fault_tolerance: 'Redis Sentinel for automatic failover, snapshot persistence'
+        },
+        {
+          name: 'Message Queue',
+          type: 'Message Broker',
+          purpose: 'Asynchronous communication between services, event streaming for order processing',
+          technologies: ['Apache Kafka', 'AWS MSK'],
+          scalability: 'Partitioned topics for parallel processing, consumer groups',
+          fault_tolerance: 'Multi-broker cluster, topic replication, offset management'
+        }
+      ]
+      tradeOffs = [
+        {
+          decision: 'Microservices vs Monolith',
+          chosen: 'Microservices',
+          reasoning: 'Need independent scaling of payment and product services to handle varying load patterns',
+          trade_offs: {
+            benefits: ['Independent deployment', 'Technology flexibility', 'Fault isolation', 'Team autonomy'],
+            costs: ['Increased complexity', 'Network latency', 'Distributed debugging challenges', 'Higher operational overhead']
+          },
+          mitigation: 'Implement comprehensive monitoring, distributed tracing, and API contracts'
+        },
+        {
+          decision: 'SQL vs NoSQL for Orders',
+          chosen: 'MongoDB (NoSQL)',
+          reasoning: 'Order data has varying schema and needs flexible querying for analytics',
+          trade_offs: {
+            benefits: ['Schema flexibility', 'Horizontal scaling', 'Fast writes', 'Document structure matches domain'],
+            costs: ['Eventual consistency challenges', 'Complex transactions', 'Join operations expensive']
+          },
+          mitigation: 'Use PostgreSQL for critical payment data, MongoDB for order history'
+        },
+        {
+          decision: 'Synchronous vs Asynchronous Order Processing',
+          chosen: 'Event-Driven (Async)',
+          reasoning: 'Decouple order placement from fulfillment to handle traffic spikes',
+          trade_offs: {
+            benefits: ['Better throughput', 'Resilience to service failures', 'Peak load handling'],
+            costs: ['Eventual consistency', 'Complex error handling', 'Message ordering challenges']
+          },
+          mitigation: 'Implement idempotency, saga pattern for distributed transactions'
+        }
+      ]
+      issues = [
+        { issue: 'PCI-DSS Compliance Risk', severity: 'Critical', mitigation: 'Use tokenization, never store full card numbers, regular security audits' },
+        { issue: 'Inventory Consistency', severity: 'High', mitigation: 'Implement optimistic locking and eventual consistency checks' },
+        { issue: 'Payment Gateway Single Point of Failure', severity: 'High', mitigation: 'Integrate multiple payment providers with automatic failover' },
+        { issue: 'Cross-Service Transaction Consistency', severity: 'High', mitigation: 'Use Saga pattern with compensating transactions' }
+      ]
+    } else if (isSocial) {
+      projectName = 'Social Media Platform'
+      components = [
+        {
+          name: 'CDN',
+          type: 'Edge Network',
+          purpose: 'Content delivery for static assets, images, and videos with global distribution',
+          technologies: ['CloudFront', 'Cloudflare', 'Akamai'],
+          scalability: 'Global edge locations with automatic cache scaling',
+          fault_tolerance: 'Multi-region failover, origin shielding'
+        },
+        {
+          name: 'Feed Service',
+          type: 'Microservice',
+          purpose: 'Real-time feed generation, ranking algorithm, and content distribution',
+          technologies: ['Go', 'Redis', 'Cassandra'],
+          scalability: 'Fan-out on write, pre-computed feeds stored in cache',
+          fault_tolerance: 'Graceful degradation, stale feed fallback'
+        },
+        {
+          name: 'Messaging Service',
+          type: 'Microservice',
+          purpose: 'Real-time messaging, WebSocket connections, and chat functionality',
+          technologies: ['Node.js', 'Socket.io', 'Redis Pub/Sub'],
+          scalability: 'Sticky sessions with load balancer, connection pooling',
+          fault_tolerance: 'Message persistence, automatic reconnection'
+        },
+        {
+          name: 'Media Service',
+          type: 'Microservice',
+          purpose: 'Video upload, transcoding, streaming, and image processing',
+          technologies: ['Python', 'FFmpeg', 'AWS MediaConvert', 'S3'],
+          scalability: 'Job queue for video processing, auto-scaling workers',
+          fault_tolerance: 'Retry mechanism, multi-region storage'
+        },
+        {
+          name: 'User Service',
+          type: 'Microservice',
+          purpose: 'User profiles, authentication, followers/following relationships',
+          technologies: ['Java', 'PostgreSQL', 'Neo4j'],
+          scalability: 'Graph database for social connections, caching layer',
+          fault_tolerance: 'Database replication, session redundancy'
+        },
+        {
+          name: 'Cassandra Cluster',
+          type: 'NoSQL Database',
+          purpose: 'Stores posts, comments, and activity feeds with high write throughput',
+          technologies: ['Cassandra', 'AWS Keyspaces'],
+          scalability: 'Linear scalability with node addition, partitioning by user ID',
+          fault_tolerance: 'Multi-datacenter replication, tunable consistency'
+        }
+      ]
+      tradeOffs = [
+        {
+          decision: 'Fan-out on Write vs Fan-out on Read',
+          chosen: 'Hybrid Approach',
+          reasoning: 'Popular users use fan-out on read, regular users use fan-out on write',
+          trade_offs: {
+            benefits: ['Optimized for different user tiers', 'Better resource utilization'],
+            costs: ['Complex implementation', 'Inconsistent user experience']
+          },
+          mitigation: 'Implement tiering logic based on follower count'
+        }
+      ]
+      issues = [
+        { issue: 'Real-time Feed Consistency', severity: 'High', mitigation: 'Accept eventual consistency, use cache invalidation' },
+        { issue: 'Video Transcoding Cost', severity: 'High', mitigation: 'Adaptive bitrate, lazy transcoding for low-view videos' }
+      ]
+    } else if (isHealthcare) {
+      projectName = 'Healthcare Management System'
+      components = [
+        {
+          name: 'FHIR Gateway',
+          type: 'API Gateway',
+          purpose: 'HIPAA-compliant API gateway for healthcare data exchange using FHIR standard',
+          technologies: ['HAPI FHIR', 'AWS API Gateway', 'OAuth 2.0'],
+          scalability: 'Auto-scaling with request throttling per tenant',
+          fault_tolerance: 'Multi-region deployment, health monitoring'
+        },
+        {
+          name: 'EHR Service',
+          type: 'Microservice',
+          purpose: 'Electronic health records management, patient data storage, and medical history',
+          technologies: ['Java', 'PostgreSQL', 'HL7'],
+          scalability: 'Partitioned by healthcare provider, read replicas',
+          fault_tolerance: 'Encrypted backups, audit logging, data replication'
+        },
+        {
+          name: 'Appointment Service',
+          type: 'Microservice',
+          purpose: 'Scheduling, calendar management, and appointment reminders',
+          technologies: ['Node.js', 'PostgreSQL', 'Twilio'],
+          scalability: 'Horizontally scalable, time-based partitioning',
+          fault_tolerance: 'Queue-based notification system, retry logic'
+        },
+        {
+          name: 'Telemedicine Service',
+          type: 'Microservice',
+          purpose: 'Video consultations, real-time communication, and session recording',
+          technologies: ['WebRTC', 'Twilio Video', 'Node.js'],
+          scalability: 'Dynamic resource allocation per session',
+          fault_tolerance: 'Fallback to audio-only, session recovery'
+        },
+        {
+          name: 'Encrypted Database',
+          type: 'Database',
+          purpose: 'HIPAA-compliant storage with encryption at rest and in transit',
+          technologies: ['PostgreSQL', 'AWS RDS', 'TDE'],
+          scalability: 'Vertical scaling for compliance requirements',
+          fault_tolerance: 'Automated backups, point-in-time recovery, audit logs'
+        }
+      ]
+      tradeOffs = [
+        {
+          decision: 'On-Premise vs Cloud',
+          chosen: 'Hybrid Cloud',
+          reasoning: 'Sensitive data on-premise, non-sensitive workloads on cloud for compliance',
+          trade_offs: {
+            benefits: ['Regulatory compliance', 'Data sovereignty', 'Cost optimization'],
+            costs: ['Complex networking', 'Higher operational complexity', 'Latency']
+          },
+          mitigation: 'Implement VPN, data classification, strict access controls'
+        }
+      ]
+      issues = [
+        { issue: 'HIPAA Compliance', severity: 'Critical', mitigation: 'Encryption, access controls, audit logging, BAA agreements' },
+        { issue: 'Data Privacy Regulations', severity: 'Critical', mitigation: 'GDPR compliance, data anonymization, consent management' }
+      ]
+    } else {
+      projectName = 'Custom System Design'
+      components = [
+        {
+          name: 'Load Balancer',
+          type: 'Edge Service',
+          purpose: 'Distributes incoming traffic across multiple backend servers',
+          technologies: ['NGINX', 'HAProxy', 'AWS ALB'],
+          scalability: 'Supports auto-scaling of backend instances',
+          fault_tolerance: 'Health checks, automatic failover'
+        },
+        {
+          name: 'Application Service',
+          type: 'Microservice',
+          purpose: 'Core business logic processing and API endpoints',
+          technologies: ['Node.js', 'Express', 'TypeScript'],
+          scalability: 'Stateless design, horizontal scaling with containers',
+          fault_tolerance: 'Multiple replicas, graceful shutdown'
+        },
+        {
+          name: 'Database',
+          type: 'Data Store',
+          purpose: 'Persistent data storage for application state',
+          technologies: ['PostgreSQL', 'MongoDB'],
+          scalability: 'Read replicas, connection pooling',
+          fault_tolerance: 'Automated backups, replication'
+        },
+        {
+          name: 'Cache Layer',
+          type: 'Cache',
+          purpose: 'Reduces database load and improves response times',
+          technologies: ['Redis', 'Memcached'],
+          scalability: 'Cluster mode, sharding',
+          fault_tolerance: 'Replication, persistence'
+        }
+      ]
+      tradeOffs = [
+        {
+          decision: 'Caching Strategy',
+          chosen: 'Write-Through Cache',
+          reasoning: 'Ensures data consistency while improving read performance',
+          trade_offs: {
+            benefits: ['Data consistency', 'Cache freshness', 'Simple implementation'],
+            costs: ['Slower writes', 'Cache overhead', 'Potential cache bloat']
+          },
+          mitigation: 'Implement TTL policies and cache eviction strategies'
+        }
+      ]
+      issues = [
+        { issue: 'Single Database Bottleneck', severity: 'High', mitigation: 'Implement read replicas and sharding' },
+        { issue: 'Cache Invalidation Complexity', severity: 'Medium', mitigation: 'Use TTL and event-driven invalidation' }
+      ]
+    }
+
+    return {
+      project_name: projectName,
+      version: '1.0',
+      architecture: {
+        overview: `A scalable, fault-tolerant architecture designed for ${projectName.toLowerCase()} with microservices pattern`,
+        architecture_style: 'Microservices Architecture',
+        components,
+        trade_off_decisions: tradeOffs
+      },
+      validation: {
+        overall_assessment: 'The system design demonstrates good architectural practices with clear separation of concerns',
+        summary: 'Architecture validated for scalability, fault tolerance, and security requirements',
+        potential_issues: issues
+      },
+      documentation: {
+        cost_estimation: {
+          monthly_estimate: '$12,000 - $18,000',
+          breakdown: {
+            'Compute (EC2/ECS)': '$4,500',
+            'Database (RDS/DynamoDB)': '$3,200',
+            'Cache (ElastiCache)': '$1,800',
+            'CDN (CloudFront)': '$1,500',
+            'Load Balancer': '$500',
+            'Networking': '$800',
+            'Storage (S3)': '$700'
+          }
+        },
+        summary: `Comprehensive ${projectName} design with focus on scalability and reliability`,
+        executive_summary: `This architecture provides a robust foundation for ${projectName.toLowerCase()} with emphasis on high availability, security, and performance optimization.`
+      },
+      requirements: {
+        functional: requirements,
+        non_functional: {
+          scalability: '100K+ concurrent users',
+          availability: '99.9% uptime',
+          performance: 'Sub-200ms response time'
+        }
+      },
+      research: {
+        industry_patterns: 'Microservices, Event-Driven Architecture, CQRS',
+        similar_systems: 'Based on industry-leading patterns from major platforms'
+      },
+      orchestration_notes: 'Generated in demo mode for testing edit and export features'
+    }
+  }
 
   const handleGenerate = async () => {
     if (!systemRequirements.trim()) {
@@ -301,6 +646,28 @@ export default function Home() {
     setLoadingStage('Analyzing requirements')
 
     try {
+      if (useDemoMode) {
+        // Demo mode - generate mock design immediately
+        setLoadingStage('Researching patterns')
+        await new Promise(resolve => setTimeout(resolve, 800))
+
+        setLoadingStage('Designing architecture')
+        await new Promise(resolve => setTimeout(resolve, 800))
+
+        setLoadingStage('Validating design')
+        await new Promise(resolve => setTimeout(resolve, 800))
+
+        setLoadingStage('Finalizing')
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const mockDesign = generateMockDesign(systemRequirements)
+        setSystemDesign(mockDesign)
+        setLoading(false)
+        setLoadingStage('')
+        return
+      }
+
+      // Real API mode
       const message = `
 System Requirements:
 ${systemRequirements}
@@ -525,6 +892,25 @@ Please analyze these requirements and provide a comprehensive system design with
                 disabled={loading}
               />
 
+              <div className="flex items-center justify-between p-4 bg-slate-900/50 border border-slate-700 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-white">Demo Mode</p>
+                  <p className="text-xs text-slate-400">Generate mock designs instantly without API credits</p>
+                </div>
+                <button
+                  onClick={() => setUseDemoMode(!useDemoMode)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    useDemoMode ? 'bg-teal-600' : 'bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      useDemoMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
               <Button
                 onClick={handleGenerate}
                 disabled={loading || !systemRequirements.trim()}
@@ -538,7 +924,7 @@ Please analyze these requirements and provide a comprehensive system design with
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5 mr-3" />
-                    Generate System Design
+                    {useDemoMode ? 'Generate Demo Design' : 'Generate System Design'}
                   </>
                 )}
               </Button>
